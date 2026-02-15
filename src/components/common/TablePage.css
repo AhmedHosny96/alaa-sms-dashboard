@@ -1,0 +1,157 @@
+.table-page-card {
+  margin: 12px;
+  padding: 8px;
+  border-color: rgb(223, 219, 219);
+  box-shadow: 1px 1px 1px 1px rgba(211, 209, 209, 0.6);
+}
+
+.table-page-toolbar {
+  display: flex;
+  justify-content: flex-start;
+  margin-right: 12px;
+  margin-bottom: 20px;
+  overflow: visible;
+}
+
+.table-page-addButton,
+.table-page-filter {
+  margin-right: 12px;
+}
+
+.table-page-tag {
+  height: 30px;
+  text-align: center;
+}
+
+.table-page-search {
+  margin-left: auto;
+  max-width: 300px;
+}
+
+.range-form {
+  padding: 4px 2px;
+}
+
+.range-form-card {
+  border: 1px solid var(--bs-border-color);
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.06);
+  background-color: var(--bs-body-bg);
+}
+
+.range-form-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(180deg, var(--bs-body-bg) 0%, var(--bs-body-bg) 100%);
+  border-bottom: 1px solid var(--bs-border-color);
+  padding: 12px 16px;
+}
+
+.range-form-sticky {
+  position: sticky;
+  top: 12px;
+}
+
+.range-summary {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.range-divider {
+  height: 1px;
+  background: var(--bs-border-color);
+  margin: 12px 0;
+}
+
+.range-tier-table thead th {
+  background: var(--bs-tertiary-bg, var(--bs-body-bg));
+  font-weight: 600;
+  color: var(--bs-body-color);
+}
+
+.range-tier-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.range-tier-table th:nth-child(2),
+.range-tier-table td:nth-child(2) {
+  min-width: 110px;
+}
+
+.range-tier-table td:nth-child(2) .form-select {
+  width: 100%;
+  min-width: 110px;
+}
+
+.sms-numbers-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.sms-numbers-toolbar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.sms-numbers-select {
+  min-width: 170px;
+}
+
+.sms-numbers-filter {
+  min-width: 220px;
+}
+
+.sms-numbers-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.sms-numbers-action-btn {
+  width: 34px;
+  height: 30px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sms-numbers-export {
+  min-width: 80px;
+}
+
+.sms-numbers-toolbar-compact .table-page-filter {
+  width: auto;
+  min-width: 0;
+  flex: 0 0 auto;
+}
+
+.cdr-toolbar-inline {
+  flex-wrap: nowrap;
+  overflow: visible;
+  gap: 8px;
+}
+
+.cdr-toolbar-inline .dropdown-menu {
+  z-index: 1060;
+}
+
+.table-page-date-range {
+  max-width: 170px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cdr-table {
+  min-width: 1400px;
+}
+

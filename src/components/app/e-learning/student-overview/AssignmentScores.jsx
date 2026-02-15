@@ -1,0 +1,133 @@
+import FalconCardHeader from 'components/common/FalconCardHeader';
+import { Card, Col, Row } from 'react-bootstrap';
+import { PieChart } from 'echarts/charts';
+import {
+  GridComponent,
+  LegendComponent,
+  TitleComponent,
+  TooltipComponent
+} from 'echarts/components';
+import * as echarts from 'echarts/core';
+import { CanvasRenderer } from 'echarts/renderers';
+import FalconLink from 'components/common/FalconLink';
+import Flex from 'components/common/Flex';
+import SubtleBadge from 'components/common/SubtleBadge';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useAppContext } from 'providers/AppProvider';
+import ReactEchart from 'components/common/ReactEchart';
+
+echarts.use([
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  PieChart,
+  CanvasRenderer,
+  LegendComponent
+]);
+
+const data = [
+  { value: 12, name: '90-100%' },
+  { value: 16, name: '70-90%' },
+  { value: 12, name: '40-70%' },
+  { value: 2, name: '0-40%' }
+];
+
+const getOptions = getThemeColor => ({
+  color: [
+    getThemeColor('success'),
+    getThemeColor('primary'),
+    getThemeColor('info'),
+    getThemeColor('warning')
+  ],
+  tooltip: {
+    trigger: 'item',
+    padding: [7, 10],
+    backgroundColor: getThemeColor('gray-100'),
+    borderColor: getThemeColor('gray-300'),
+    textStyle: { color: getThemeColor('gray-1100') },
+    borderWidth: 1,
+    transitionDuration: 0,
+    formatter: params =>
+      `<strong>${params.data.name}:</strong> ${params.data.value}%`
+  },
+
+  legend: { show: false },
+  series: [
+    {
+      type: 'pie',
+      radius: ['85%', '60%'],
+      avoidLabelOverlap: false,
+      itemStyle: {
+        borderWidth: 2,
+        borderColor: getThemeColor('gray-100')
+      },
+      label: {
+        show: false
+      },
+      emphasis: {
+        scale: false
+      },
+      labelLine: { show: false },
+      data
+    }
+  ]
+});
+
+const AssignmentScores = ({ scoresData }) => {
+  const { getThemeColor } = useAppContext();
+  return (
+    <Card className="h-100 font-sans-serif">
+      <FalconCardHeader
+        light
+        title="Assignment Scores"
+        titleTag="h6"
+        className="py-2"
+        endEl={
+          <FalconLink title="Individual results" className="px-0 fw-medium" />
+        }
+      />
+      <Card.Body>
+        <Row className="g-0 h-100">
+          <Col sm={7} className="order-1 order-sm-0">
+            <Row className="g-sm-0 gy-4 row-cols-2 h-100 align-content-between">
+              {scoresData.map(item => (
+                <Col key={item.id}>
+                  <Flex className="mb-3 gap-2">
+                    <div className={`vr rounded ps-1 bg-${item.color}`} />
+                    <h6 className="lh-base text-700 mb-0">{item.range}</h6>
+                  </Flex>
+                  <h5 className="fw-normal">{item.courses} Courses</h5>
+                  <h6 className="mb-0">
+                    <span className="text-500 me-2">this week</span>
+                    <SubtleBadge
+                      bg={item.badge.type}
+                      pill
+                      className="d-none d-md-inline-block ms-2"
+                    >
+                      {item.badge.icon && (
+                        <FontAwesomeIcon
+                          icon={item.badge.icon}
+                          className="ms-1"
+                        />
+                      )}
+                      {item.badge.content}
+                    </SubtleBadge>
+                  </h6>
+                </Col>
+              ))}
+            </Row>
+          </Col>
+          <Col sm={5}>
+            <ReactEchart
+              echarts={echarts}
+              option={getOptions(getThemeColor)}
+              style={{ height: 200 }}
+            />
+          </Col>
+        </Row>
+      </Card.Body>
+    </Card>
+  );
+};
+
+export default AssignmentScores;
