@@ -55,8 +55,46 @@ const ROLE_COLUMNS = (onEdit, onDelete) => [
   }
 ];
 
+const DEFAULT_ROLES = [
+  {
+    id: 'platform-owner',
+    name: 'Platform Owner',
+    scope: 'Platform Owner',
+    description: 'Full system control and global visibility.',
+    status: 'Active'
+  },
+  {
+    id: 'company-admin',
+    name: 'Company Admin',
+    scope: 'Company',
+    description: 'Manage clients, pricing, routes, providers.',
+    status: 'Active'
+  },
+  {
+    id: 'company-finance',
+    name: 'Company Finance',
+    scope: 'Company',
+    description: 'View company invoices and revenue.',
+    status: 'Active'
+  },
+  {
+    id: 'client-user',
+    name: 'Client User',
+    scope: 'Client',
+    description: 'View messages and reports.',
+    status: 'Active'
+  },
+  {
+    id: 'client-finance',
+    name: 'Client Finance',
+    scope: 'Client',
+    description: 'View invoices only.',
+    status: 'Active'
+  }
+];
+
 const RoleList = () => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState(DEFAULT_ROLES);
   const [loading] = useState(false);
   const [query, setQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('');

@@ -29,3 +29,33 @@ To run the production build locally, run the following commands:
 ```shell
  npm run preview
 ```
+
+## Docker + Nginx Deployment (End-to-End)
+
+This project includes a Dockerized build with Nginx serving the compiled Vite app.
+
+### 1) Build and run with Docker Compose
+
+```shell
+docker compose up --build -d
+```
+
+The app will be available at http://localhost:8080.
+
+### 2) Dummy domain for local testing
+
+Add the following entry to your hosts file:
+
+- Ubuntu: /etc/hosts
+
+```
+127.0.0.1 sms-dashboard.local
+```
+
+Then open: http://sms-dashboard.local:8080
+
+### 3) Container details
+
+- Nginx config: nginx/default.conf
+- Dockerfile: Dockerfile
+- Compose: docker-compose.yml
