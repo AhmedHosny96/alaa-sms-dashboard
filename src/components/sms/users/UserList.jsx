@@ -9,6 +9,7 @@ const USER_COLUMNS = (onEdit, onDelete) => [
   { title: 'Name', dataIndex: 'name', key: 'name' },
   { title: 'Email', dataIndex: 'email', key: 'email' },
   { title: 'Phone', dataIndex: 'phone', key: 'phone' },
+  { title: 'Type', dataIndex: 'role', key: 'role' },
   {
     title: 'Status',
     dataIndex: 'status',
@@ -50,17 +51,25 @@ const USER_COLUMNS = (onEdit, onDelete) => [
   }
 ];
 
-const UserList = ({ roleLabel, title, subtitle }) => {
+const UserList = () => {
   const [data, setData] = useState([]);
   const [loading] = useState(false);
   const [query, setQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
+  const [filterRole, setFilterRole] = useState('');
   const [modalShow, setModalShow] = useState(false);
   const [recordForEdit, setRecordForEdit] = useState(null);
 
   const statusOptions = [
     { value: 'Active', label: 'Active' },
     { value: 'Inactive', label: 'Inactive' }
+  ];
+
+  const roleOptions = [
+    { value: 'Company Admin', label: 'Company Admin' },
+    { value: 'Company Finance', label: 'Company Finance' },
+    { value: 'Client User', label: 'Client User' },
+    { value: 'Client Finance', label: 'Client Finance' }
   ];
 
   const columns = useMemo(
@@ -80,16 +89,17 @@ const UserList = ({ roleLabel, title, subtitle }) => {
   const filteredData = useMemo(() => {
     let list = Array.isArray(data) ? [...data] : [];
     if (filterStatus) list = list.filter((row) => String(row.status) === String(filterStatus));
+    if (filterRole) list = list.filter((row) => String(row.role) === String(filterRole));
     if (query) {
       const q = query.toLowerCase();
       list = list.filter((row) =>
-        [row.name, row.email, row.phone, row.status, row.lastLogin]
+        [row.name, row.email, row.phone, row.role, row.status, row.lastLogin]
           .filter((v) => v != null)
           .some((val) => String(val).toLowerCase().includes(q))
       );
     }
     return list;
-  }, [data, filterStatus, query]);
+  }, [data, filterStatus, filterRole, query]);
 
   const handleAdd = () => {
     setRecordForEdit(null);
@@ -108,15 +118,22 @@ const UserList = ({ roleLabel, title, subtitle }) => {
   return (
     <>
       <TablePageLayout
-        title={title}
-        subtitle={subtitle}
+        title="Users"
+        subtitle="Manage all users with role-based access."
         toolbar={
           <>
             <div className="d-flex gap-2 flex-wrap align-items-center">
               <Button variant="primary" size="sm" className="table-page-addButton" onClick={handleAdd}>
                 <FontAwesomeIcon icon="plus" className="me-1" />
-                Add {roleLabel}
+                Add User
               </Button>
+              <TableSelectFilter
+                className="table-page-filter"
+                value={filterRole}
+                placeholder="User Type"
+                onChange={(value) => setFilterRole(value)}
+                options={roleOptions}
+              />
               <TableSelectFilter
                 className="table-page-filter"
                 value={filterStatus}
@@ -147,7 +164,7 @@ const UserList = ({ roleLabel, title, subtitle }) => {
         record={recordForEdit}
         onClose={handleCloseModal}
         onSubmit={handleSubmit}
-        roleLabel={roleLabel}
+        roleLabel={recordForEdit?.role}
       />
     </>
   );

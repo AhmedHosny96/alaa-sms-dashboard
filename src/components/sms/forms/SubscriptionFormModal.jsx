@@ -2,14 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { Button } from 'react-bootstrap';
 import { UseModal, useForm, Forms, UseInput, UseSelect } from 'components/common/UseTable';
 
-const UserFormModal = ({ show, onClose, onSubmit, record, roleLabel, title }) => {
-  const roleOptions = [
-    { id: 'Platform Admin', name: 'Platform Admin' },
-    { id: 'Company Admin', name: 'Company Admin' },
-    { id: 'Company Finance', name: 'Company Finance' },
-    { id: 'Client User', name: 'Client User' },
-    { id: 'Client Finance', name: 'Client Finance' }
-  ];
+const SubscriptionFormModal = ({ show, onClose, onSubmit, record }) => {
   const statusOptions = [
     { id: 'Active', name: 'Active' },
     { id: 'Inactive', name: 'Inactive' }
@@ -18,12 +11,11 @@ const UserFormModal = ({ show, onClose, onSubmit, record, roleLabel, title }) =>
   const initialValues = useMemo(
     () => ({
       name: record?.name ?? '',
-      email: record?.email ?? '',
-      phone: record?.phone ?? '',
-      status: record?.status ?? 'Active',
-      role: record?.role ?? roleLabel ?? 'Company Admin'
+      price: record?.price ?? '',
+      tps: record?.tps ?? '',
+      status: record?.status ?? 'Active'
     }),
-    [record, roleLabel]
+    [record]
   );
 
   const { values, setValues, handleOnChange } = useForm(initialValues);
@@ -39,7 +31,7 @@ const UserFormModal = ({ show, onClose, onSubmit, record, roleLabel, title }) =>
 
   return (
     <UseModal
-      title={title || (record ? `Edit ${roleLabel}` : `Add ${roleLabel}`)}
+      title={record ? 'Edit Subscription' : 'Create Subscription'}
       isVisible={show}
       setIsVisible={() => {}}
       onCancel={onClose}
@@ -47,41 +39,34 @@ const UserFormModal = ({ show, onClose, onSubmit, record, roleLabel, title }) =>
         <Button key="cancel" variant="secondary" size="sm" onClick={onClose}>
           Cancel
         </Button>,
-        <Button key="submit" variant="primary" size="sm" type="submit" form="user-form">
-          {record ? 'Update' : 'Save'}
+        <Button key="submit" variant="primary" size="sm" type="submit" form="subscription-form">
+          {record ? 'Update' : 'Create'}
         </Button>
       ]}
     >
-      <Forms id="user-form" onFinish={handleSubmit}>
+      <Forms id="subscription-form" onFinish={handleSubmit}>
         <UseInput
           name="name"
-          label="Full Name"
+          label="Plan Name"
           value={values.name}
           onChange={handleOnChange}
-          placeholder="John Doe"
+          placeholder="Starter"
         />
         <UseInput
-          name="email"
-          label="Email"
-          type="email"
-          value={values.email}
+          name="price"
+          label="Monthly Price (USD)"
+          type="number"
+          value={values.price}
           onChange={handleOnChange}
-          placeholder="user@example.com"
+          placeholder="200"
         />
         <UseInput
-          name="phone"
-          label="Phone"
-          value={values.phone}
+          name="tps"
+          label="TPS Limit"
+          type="number"
+          value={values.tps}
           onChange={handleOnChange}
-          placeholder="+1 555 000 000"
-        />
-        <UseSelect
-          name="role"
-          label="User Type"
-          value={values.role}
-          options={roleOptions}
-          onChange={(v) => setValues((prev) => ({ ...prev, role: v }))}
-          placeholder="Select user type"
+          placeholder="20"
         />
         {record && (
           <UseSelect
@@ -98,4 +83,4 @@ const UserFormModal = ({ show, onClose, onSubmit, record, roleLabel, title }) =>
   );
 };
 
-export default UserFormModal;
+export default SubscriptionFormModal;

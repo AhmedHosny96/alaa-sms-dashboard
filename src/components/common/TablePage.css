@@ -7,15 +7,19 @@
 
 .table-page-toolbar {
   display: flex;
-  justify-content: flex-start;
+  justify-content: flex-end;
+  gap: 0;
   margin-right: 12px;
   margin-bottom: 20px;
   overflow: visible;
 }
 
-.table-page-addButton,
-.table-page-filter {
+.table-page-addButton {
   margin-right: 12px;
+}
+
+.table-page-filter {
+  margin-right: 0;
 }
 
 .table-page-tag {
@@ -24,8 +28,14 @@
 }
 
 .table-page-search {
-  margin-left: auto;
+  margin-left: 0;
   max-width: 300px;
+}
+
+.table-page-toolbar .react-datepicker-wrapper,
+.table-page-toolbar .react-datepicker__input-container {
+  width: auto;
+  display: inline-flex;
 }
 
 .range-form {

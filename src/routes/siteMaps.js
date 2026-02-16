@@ -24,19 +24,19 @@ export const appRoutes = {
       children: [
         {
           name: 'Domain',
-          to: paths.smsRangeProviders,
+          to: paths.smsDomainList,
           active: true
         }
       ]
     },
     {
-      name: 'Cariers',
+      name: 'Carriers',
       icon: 'satellite-dish',
       active: true,
       children: [
         {
-          name: 'Domain',
-          to: paths.smsRangeProviders,
+          name: 'Carriers',
+          to: paths.smsListProviders,
           active: true
         }
       ]
@@ -47,13 +47,8 @@ export const appRoutes = {
       active: true,
       children: [
         {
-          name: 'Connections',
-          to: paths.smsHttpConnections,
-          active: true
-        },
-        {
-          name: 'List Connections',
-          to: paths.smsListHttpConnections,
+          name: 'Companies',
+          to: paths.smsCompaniesList,
           active: true
         }
       ]
@@ -63,9 +58,14 @@ export const appRoutes = {
       icon: 'chart-pie',
       active: true,
       children: [
-        {
-          name: 'Settings',
-          to: paths.smsAccountSettings,
+        // {
+        //   name: 'Settings',
+        //   to: paths.smsAccountSettings,
+        //   active: true
+        // },
+         {
+          name: 'API Keys',
+          to: paths.smsAccountApiKeys,
           active: true
         },
         {
@@ -73,38 +73,34 @@ export const appRoutes = {
           to: paths.smsAccountBilling,
           active: true
         },
+       
+        // {
+        //   name: 'Overview',
+        //   to: paths.smsAccountOverview,
+        //   active: true
+        // },
         {
-          name: 'API & Log',
-          to: paths.smsAccountApiKeys,
-          active: true
-        },
-        {
-          name: 'Overview',
-          to: paths.smsAccountOverview,
+          name: 'Audit Logs',
+          to: paths.smsAuditLogs,
           active: true
         }
       ]
     },
     {
-      name: 'Users',
+      name: 'Users & Roles',
       icon: 'user',
       active: true,
       children: [
         {
-          name: 'Admins',
-          to: paths.smsUsersAdmins,
+          name: 'Users',
+          to: paths.smsUsersList,
           active: true
         },
         {
-          name: 'Agents',
-          to: paths.smsUsersAgents,
-          active: true
-        },
-        {
-          name: 'Clients',
-          to: paths.smsUsersClients,
-          active: true
-        }
+            name: 'Roles',
+            to: paths.smsRolesList,
+            active: true
+          }
       ]
     },
     {
@@ -125,17 +121,17 @@ export const appRoutes = {
       active: true,
       children: [
         {
-          name: 'List Number',
+          name: 'SMS Numbers',
           to: paths.smsTestListNumbers,
           active: true
         },
         {
-          name: 'CDRs',
+          name: 'SMS CDRs',
           to: paths.smsTestCdrs,
           active: true
         },
         {
-          name: 'Access list Last Hour',
+          name: 'SMS Access',
           to: paths.smsTestAccessLastHour,
           active: true
         }
@@ -206,6 +202,36 @@ export const appRoutes = {
       ]
     },
     {
+      name: 'Subscriptions',
+      icon: 'file-invoice-dollar',
+      to: paths.smsSubscriptions,
+      active: true
+    },
+    {
+      name: 'Payments',
+      icon: 'money-bill',
+      active: true,
+      children: [
+        {
+          name: 'Statements',
+          to: paths.smsBills,
+          active: true
+        },
+        {
+          name: 'Currency',
+          to: paths.smsPaymentCurrencies,
+          active: true
+        },
+        {
+          name: 'Payment Requests',
+          to: paths.smsPaymentRequests,
+          active: true
+        }
+      ]
+    },
+  
+    
+    {
       name: 'OSS',
       icon: 'server',
       active: true,
@@ -241,33 +267,7 @@ export const appRoutes = {
         }
       ]
     },
-    {
-      name: 'Payments',
-      icon: 'money-bill',
-      active: true,
-      children: [
-        {
-          name: 'Bills',
-          to: paths.smsBills,
-          active: true
-        },
-        {
-          name: 'Currency',
-          to: paths.smsPaymentCurrencies,
-          active: true
-        },
-        {
-          name: 'Payment Requests',
-          to: paths.smsPaymentRequests,
-          active: true
-        },
-        {
-          name: 'Admin requests Payment',
-          to: paths.smsAdminPaymentRequests,
-          active: true
-        }
-      ]
-    },
+    
     {
       name: 'Chat',
       icon: 'comments',

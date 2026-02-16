@@ -39,10 +39,10 @@ const Dashboard = () => {
           <TotalOrder data={totalOrder} />
         </Col>
         <Col md={6} xxl={3}>
-          <MarketShare data={marketShare} radius={['100%', '87%']} />
+          <MarketShare data={marketShare} radius={['100%', '87%']} label={'Top Clients'} />
         </Col>
         <Col md={6} xxl={3}>
-          <Weather data={weather} />
+           <MarketShare data={marketShare} radius={['100%', '87%']} label={'Top Agents'} />
         </Col>
       </Row>
 
@@ -55,14 +55,14 @@ const Dashboard = () => {
         </Col>
       </Row>
 
-      <Row className="g-3 mb-3">
+      {/* <Row className="g-3 mb-3">
         <Col lg={6} xl={7} xxl={8}>
           <StorageStatus className="h-lg-100" data={storageStatus} />
         </Col>
         <Col lg={6} xl={5} xxl={4}>
           <SpaceWarning />
         </Col>
-      </Row>
+      </Row> */}
 
       <Row className="g-3 mb-3">
         <Col lg={7} xl={8}>

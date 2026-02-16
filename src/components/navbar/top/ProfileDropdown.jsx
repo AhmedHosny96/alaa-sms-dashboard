@@ -20,21 +20,21 @@ const ProfileDropdown = () => {
 
       <Dropdown.Menu className="dropdown-caret dropdown-menu-card  dropdown-menu-end">
         <div className="bg-white rounded-2 py-2 dark__bg-1000">
-          <Dropdown.Item className="fw-bold text-warning" href="#!">
+          {/* <Dropdown.Item className="fw-bold text-warning" href="#!">
             <FontAwesomeIcon icon="crown" className="me-1" />
             <span>Go Pro</span>
           </Dropdown.Item>
-          <Dropdown.Divider />
-          <Dropdown.Item href="#!">Set status</Dropdown.Item>
+          <Dropdown.Divider /> */}
+          {/* <Dropdown.Item href="#!">Set status</Dropdown.Item> */}
           <Dropdown.Item as={Link} to={paths.userProfile}>
-            Profile &amp; account
+            My Profile
           </Dropdown.Item>
-          <Dropdown.Item href="#!">Feedback</Dropdown.Item>
-          <Dropdown.Divider />
-          <Dropdown.Item as={Link} to={paths.userSettings}>
+          {/* <Dropdown.Item href="#!">Feedback</Dropdown.Item>
+          <Dropdown.Divider /> */}
+          {/* <Dropdown.Item as={Link} to={paths.userSettings}>
             Settings
-          </Dropdown.Item>
-          <Dropdown.Item as={Link} to={paths.cardLogout}>
+          </Dropdown.Item> */}
+          <Dropdown.Item as={Link} to={paths.cardLogin}>
             Logout
           </Dropdown.Item>
         </div>

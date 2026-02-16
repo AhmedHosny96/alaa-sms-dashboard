@@ -1,16 +1,30 @@
 import React, { useMemo, useState } from 'react';
-import { Button } from 'react-bootstrap';
+import { Button, Badge } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { UseTable, Search, TableExportSelect, ConfirmDelete } from 'components/common/UseTable';
+import {
+  UseTable,
+  Search,
+  TableExportSelect,
+  TableSelectFilter,
+  ConfirmDelete
+} from 'components/common/UseTable';
 import TablePageLayout from 'components/common/TablePageLayout';
-import HttpConnectionFormModal from 'components/sms/forms/HttpConnectionFormModal';
+import RoleFormModal from 'components/sms/forms/RoleFormModal';
 
-const CONNECTION_COLUMNS = (onEdit, onDelete) => [
-  { title: 'Connection Name', dataIndex: 'name', key: 'name' },
-  { title: 'Endpoint', dataIndex: 'endpoint', key: 'endpoint' },
-  { title: 'Auth Type', dataIndex: 'authType', key: 'authType' },
-  { title: 'Status', dataIndex: 'status', key: 'status' },
-  { title: 'Last Used', dataIndex: 'lastUsed', key: 'lastUsed' },
+const ROLE_COLUMNS = (onEdit, onDelete) => [
+  { title: 'Role', dataIndex: 'name', key: 'name' },
+  { title: 'Scope', dataIndex: 'scope', key: 'scope' },
+  { title: 'Description', dataIndex: 'description', key: 'description' },
+  {
+    title: 'Status',
+    dataIndex: 'status',
+    key: 'status',
+    render: (value) => (
+      <Badge bg={value === 'Active' ? 'success' : 'secondary'} className="text-uppercase">
+        {value || '—'}
+      </Badge>
+    )
+  },
   {
     title: 'Actions',
     key: 'actions',
@@ -19,18 +33,18 @@ const CONNECTION_COLUMNS = (onEdit, onDelete) => [
     render: (_, record) => (
       <div className="d-flex justify-content-center gap-1">
         <Button
-          variant="link"
+          variant="warning"
           size="sm"
-          className="p-0 me-1 text-700"
+          className="px-2 py-0"
           onClick={() => onEdit(record)}
           title="Edit"
         >
           <FontAwesomeIcon icon="edit" />
         </Button>
         <Button
-          variant="link"
+          variant="danger"
           size="sm"
-          className="p-0 text-danger"
+          className="px-2 py-0"
           onClick={() => onDelete(record)}
           title="Delete"
         >
@@ -41,17 +55,30 @@ const CONNECTION_COLUMNS = (onEdit, onDelete) => [
   }
 ];
 
-const ListHttpConnections = () => {
+const RoleList = () => {
   const [data, setData] = useState([]);
   const [loading] = useState(false);
   const [query, setQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+  const [filterScope, setFilterScope] = useState('');
   const [modalShow, setModalShow] = useState(false);
   const [recordForEdit, setRecordForEdit] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
+  const statusOptions = [
+    { value: 'Active', label: 'Active' },
+    { value: 'Inactive', label: 'Inactive' }
+  ];
+
+  const scopeOptions = [
+    { value: 'Platform Owner', label: 'Platform Owner' },
+    { value: 'Company', label: 'Company' },
+    { value: 'Client', label: 'Client' }
+  ];
+
   const columns = useMemo(
     () =>
-      CONNECTION_COLUMNS(
+      ROLE_COLUMNS(
         (record) => {
           setRecordForEdit(record);
           setModalShow(true);
@@ -65,16 +92,18 @@ const ListHttpConnections = () => {
 
   const filteredData = useMemo(() => {
     let list = Array.isArray(data) ? [...data] : [];
+    if (filterStatus) list = list.filter((row) => String(row.status) === String(filterStatus));
+    if (filterScope) list = list.filter((row) => String(row.scope) === String(filterScope));
     if (query) {
       const q = query.toLowerCase();
       list = list.filter((row) =>
-        [row.name, row.endpoint, row.authType, row.status, row.lastUsed]
-          .filter(Boolean)
-          .some((value) => String(value).toLowerCase().includes(q))
+        [row.name, row.scope, row.description, row.status]
+          .filter((v) => v != null)
+          .some((val) => String(val).toLowerCase().includes(q))
       );
     }
     return list;
-  }, [data, query]);
+  }, [data, filterStatus, filterScope, query]);
 
   const handleAdd = () => {
     setRecordForEdit(null);
@@ -87,7 +116,9 @@ const ListHttpConnections = () => {
   };
 
   const handleConfirmDelete = () => {
-    if (deleteTarget) setData((prev) => prev.filter((r) => r.id !== deleteTarget.id));
+    if (deleteTarget) {
+      setData((prev) => prev.filter((r) => (r.id ?? r.name) !== (deleteTarget.id ?? deleteTarget.name)));
+    }
     setDeleteTarget(null);
   };
 
@@ -98,25 +129,39 @@ const ListHttpConnections = () => {
   return (
     <>
       <TablePageLayout
-        title="Company Connections"
-        subtitle="Manage HTTP company connections and credentials."
+        title="Roles"
+        subtitle="Create and manage role permissions and access levels."
         toolbar={
           <>
             <div className="d-flex gap-2 flex-wrap align-items-center">
               <Button variant="primary" size="sm" className="table-page-addButton" onClick={handleAdd}>
                 <FontAwesomeIcon icon="plus" className="me-1" />
-                Add Connection
+                Add Role
               </Button>
-              <TableExportSelect
+              {/* <TableSelectFilter
+                className="table-page-filter"
+                value={filterScope}
+                placeholder="Scope"
+                onChange={(value) => setFilterScope(value)}
+                options={scopeOptions}
+              /> */}
+              <TableSelectFilter
+                className="table-page-filter"
+                value={filterStatus}
+                placeholder="Status"
+                onChange={(value) => setFilterStatus(value)}
+                options={statusOptions}
+              />
+              {/* <TableExportSelect
                 onExport={(type) => {
                   if (type === 'print') window.print();
                 }}
-              />
+              /> */}
             </div>
             <Search
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="search ..."
+              placeholder="Search ..."
               className="table-page-search"
             />
           </>
@@ -125,7 +170,7 @@ const ListHttpConnections = () => {
         <TableContainer dataSource={filteredData} loading={loading} rowKey={(r) => r.id ?? r.name} />
       </TablePageLayout>
 
-      <HttpConnectionFormModal
+      <RoleFormModal
         show={modalShow}
         record={recordForEdit}
         onClose={handleCloseModal}
@@ -136,11 +181,11 @@ const ListHttpConnections = () => {
         show={!!deleteTarget}
         onHide={() => setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
-        title="Delete Connection"
-        message="Are you sure you want to delete this connection? This action cannot be undone."
+        title="Delete Role"
+        message="Are you sure you want to delete this role? This action cannot be undone."
       />
     </>
   );
 };
 
-export default ListHttpConnections;
+export default RoleList;

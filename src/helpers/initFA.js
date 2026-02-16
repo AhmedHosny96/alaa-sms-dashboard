@@ -94,6 +94,8 @@ import {
   faExclamationTriangle,
   faExternalLinkAlt,
   faEye,
+  faEyeSlash,
+  faLowVision,
   faFileAlt,
   faFileArchive,
   faFilePdf,
@@ -330,6 +332,7 @@ library.add(
   faFilePdf,
   faFileAlt,
   faEye,
+  faLowVision,
   faCaretUp,
   faCodeBranch,
   faExclamationTriangle,
@@ -481,5 +484,5 @@ library.add(
   faServer,
   faDatabase,
   faNetworkWired,
-  faSatelliteDish
+  faSatelliteDish,
 );

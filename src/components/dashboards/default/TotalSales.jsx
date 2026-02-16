@@ -133,7 +133,7 @@ const TotalSales = ({ data }) => {
   return (
     <Card className="h-100">
       <FalconCardHeader
-        title="Total Sales"
+        title="Total Monthly SMS"
         titleTag="h6"
         className="pb-0"
         endEl={

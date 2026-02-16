@@ -14,9 +14,9 @@ const TopNavRightSideNavItem = () => {
       as="ul"
     >
       <ThemeControlDropdown />
-      <CartNotification />
+     {/* <CartNotification /> */}
       <NotificationDropdown />
-      <NineDotMenu />
+      {/* <NineDotMenu /> */}
       <ProfileDropdown />
     </Nav>
   );

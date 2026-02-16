@@ -65,18 +65,18 @@ const CdrReports = () => {
   ];
   const providerOptions = [{ value: 'testnumber1', label: 'testnumber1' }];
   const rangeOptions = [{ value: 'Jamaica_Feb2026TX', label: 'Jamaica_Feb2026TX' }];
-              <TableExportSelect
-                onExport={(type) => {
-                  if (type === 'print') window.print();
-                }}
-              />
-              <Search
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search ..."
-                className="table-page-search ms-auto"
-              />
+  const agentOptions = [{ value: '70700', label: '70700' }];
+  const managerOptions = [{ value: 'manager1', label: 'manager1' }];
+
+  const filteredData = useMemo(() => {
+    let list = Array.isArray(cdrData) ? [...cdrData] : [];
     if (filterProvider) list = list.filter((row) => String(row.provider) === String(filterProvider));
+    if (filterRange) list = list.filter((row) => String(row.range) === String(filterRange));
+    if (filterAgent) list = list.filter((row) => String(row.agent) === String(filterAgent));
+    if (filterManager) list = list.filter((row) => String(row.manager) === String(filterManager));
+    if (filterDirection) list = list.filter((row) => String(row.direction) === String(filterDirection));
+    if (filterStatus) list = list.filter((row) => String(row.status) === String(filterStatus));
+    if (query) {
       const q = query.toLowerCase();
       list = list.filter((row) =>
         [
@@ -181,7 +181,6 @@ const CdrReports = () => {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search ..."
-             // style={{ minWidth: '200px' }}
               className="table-page-search"
             />
           </>

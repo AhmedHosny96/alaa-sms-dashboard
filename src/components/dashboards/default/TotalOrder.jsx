@@ -74,7 +74,7 @@ const TotalOrder = ({ data }) => {
   return (
     <Card className="h-md-100">
       <Card.Header className="pb-0">
-        <h6 className="mb-0 mt-2">Total Order</h6>
+        <h6 className="mb-0 mt-2">Total SMS</h6>
       </Card.Header>
 
       <Card.Body

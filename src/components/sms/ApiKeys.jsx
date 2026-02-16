@@ -1,13 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { Card, Col, Container, Row, Button, Form, InputGroup } from 'react-bootstrap';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Button, Form } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { UseTable, Search, TableExportSelect, ConfirmDelete, UseModal, useForm, Forms, UseInput } from 'components/common/UseTable';
+import { UseTable, Search, TableExportSelect, ConfirmDelete, UseModal, useForm, Forms, UseInput, UseSelect } from 'components/common/UseTable';
 import TablePageLayout from 'components/common/TablePageLayout';
 import { isValidIPv4ClassABC } from 'helpers/utils';
 
 const API_KEYS_COLUMNS = (onEdit, onDelete) => [
+  { title: 'Company', dataIndex: 'company', key: 'company' },
+  { title: 'TPS Limit', dataIndex: 'tpsLimit', key: 'tpsLimit', align: 'right' },
   { title: 'Key Name', dataIndex: 'keyName', key: 'keyName' },
   { title: 'Key', dataIndex: 'key', key: 'key', render: (v) => (v ? `${v.slice(0, 8)}…` : '—') },
+  { title: 'Status', dataIndex: 'status', key: 'status' },
   { title: 'Created', dataIndex: 'created', key: 'created' },
   { title: 'Last Used', dataIndex: 'lastUsed', key: 'lastUsed' },
   {
@@ -68,17 +71,51 @@ const ApiKeys = () => {
     setRecordForEdit(null);
   };
 
-  const initialKeyValues = { keyName: recordForEdit?.keyName ?? '' };
+  const statusOptions = [
+    { id: 'Active', name: 'Active' },
+    { id: 'Inactive', name: 'Inactive' }
+  ];
+
+  const companyOptions = [
+    { id: 'Company A', name: 'Company A' },
+    { id: 'Company B', name: 'Company B' }
+  ];
+
+  const companyTpsMap = {
+    'Company A': 20,
+    'Company B': 30
+  };
+
+  const initialKeyValues = useMemo(
+    () => ({
+      company: recordForEdit?.company ?? 'Company A',
+      keyName: recordForEdit?.keyName ?? '',
+      status: recordForEdit?.status ?? 'Active'
+    }),
+    [recordForEdit]
+  );
   const { values, setValues, handleOnChange } = useForm(initialKeyValues);
+  const currentTpsLimit = companyTpsMap[values.company] ?? 0;
   const [ipList, setIpList] = useState([]);
   const [ipInput, setIpInput] = useState('');
   const [ipError, setIpError] = useState('');
 
   useEffect(() => {
-    if (modalShow) setValues(initialKeyValues);
-  }, [modalShow, recordForEdit]);
+    if (!modalShow) return;
+    setValues(initialKeyValues);
+    const raw = recordForEdit?.ipWhitelist ?? '';
+    const list = raw
+      .split(/[\n,]+/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    setIpList(list);
+    setIpInput('');
+    setIpError('');
+  }, [modalShow, recordForEdit, initialKeyValues, setValues]);
 
   const handleSaveKey = () => {
+    const payload = { ...values, ipWhitelist: ipList.join('\n') };
+    void payload;
     handleCloseModal();
   };
 
@@ -109,7 +146,7 @@ const ApiKeys = () => {
     <>
       <TablePageLayout
         title="API Keys"
-        subtitle="Manage API keys and view API access logs."
+        subtitle="Manage company API keys and access settings."
         toolbar={
           <>
             <div className="d-flex gap-2 flex-wrap align-items-center">
@@ -139,68 +176,6 @@ const ApiKeys = () => {
         />
       </TablePageLayout>
 
-      <Container fluid className="py-0">
-        <Row>
-          <Col lg={8}>
-            <Card>
-              <Card.Header>
-                <h5 className="mb-0">IP Whitelist</h5>
-              </Card.Header>
-              <Card.Body>
-                <Form onSubmit={handleAddIp} className="mb-3">
-                  <Form.Label className="text-700">Add IP address</Form.Label>
-                  <InputGroup size="sm">
-                    <Form.Control
-                      value={ipInput}
-                      onChange={(e) => {
-                        setIpInput(e.target.value);
-                        setIpError('');
-                      }}
-                      placeholder="192.168.1.1"
-                      type="text"
-                      aria-label="IP address"
-                    />
-                    <Button variant="primary" type="submit" disabled={!ipInput.trim()}>
-                      Add
-                    </Button>
-                  </InputGroup>
-                  {ipError && <Form.Text className="text-danger d-block mt-1">{ipError}</Form.Text>}
-                </Form>
-                {ipList.length > 0 && (
-                  <div className="d-flex flex-wrap gap-2 align-items-center">
-                    {ipList.map((ip) => (
-                      <span
-                        key={ip}
-                        className="d-inline-flex align-items-center gap-1 px-2 py-1 border rounded shadow-none fs--1"
-                        style={{
-                          backgroundColor: 'var(--bs-input-bg, var(--bs-body-bg))',
-                          color: 'var(--bs-input-color, var(--bs-body-color))',
-                          borderColor: 'var(--bs-border-color)'
-                        }}
-                      >
-                        {ip}
-                        <button
-                          type="button"
-                          className="btn btn-link p-0 ms-1 text-danger border-0"
-                          style={{ fontSize: '0.85rem' }}
-                          onClick={() => handleRemoveIp(ip)}
-                          aria-label={`Remove ${ip}`}
-                        >
-                          <FontAwesomeIcon icon="times" />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                )}
-                {ipList.length === 0 && (
-                  <p className="text-700 fs--1 mb-0">No IPs added. Enter an address and click Add.</p>
-                )}
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
-
       <UseModal
         title={recordForEdit ? 'Edit API Key' : 'Generate New Key'}
         isVisible={modalShow}
@@ -216,6 +191,21 @@ const ApiKeys = () => {
         ]}
       >
         <Forms id="myform" onFinish={handleSaveKey}>
+          <UseSelect
+            name="company"
+            label="Company"
+            value={values.company}
+            options={companyOptions}
+            onChange={(value) => setValues((prev) => ({ ...prev, company: value }))}
+            placeholder="Select company"
+          />
+          <UseInput
+            name="tpsLimit"
+            label="TPS Limit"
+            value={currentTpsLimit}
+            onChange={() => {}}
+            readOnly
+          />
           <UseInput
             name="keyName"
             label="Key Name"
@@ -223,6 +213,67 @@ const ApiKeys = () => {
             onChange={handleOnChange}
             placeholder="e.g. Production"
           />
+          {recordForEdit && (
+            <UseSelect
+              name="status"
+              label="Status"
+              value={values.status}
+              options={statusOptions}
+              onChange={(value) => setValues((prev) => ({ ...prev, status: value }))}
+              placeholder="Select status"
+            />
+          )}
+          <Form.Group className="mb-2">
+            <Form.Label>IP Whitelist</Form.Label>
+            <div
+              className="d-flex flex-wrap align-items-center gap-2 p-2 border rounded"
+              style={{
+                backgroundColor: 'var(--bs-input-bg, var(--bs-body-bg))',
+                color: 'var(--bs-input-color, var(--bs-body-color))',
+                borderColor: 'var(--bs-border-color)'
+              }}
+            >
+              {ipList.map((ip) => (
+                <span
+                  key={ip}
+                  className="d-inline-flex align-items-center gap-1 px-2 py-1 border rounded shadow-none fs--1"
+                  style={{
+                    backgroundColor: 'var(--bs-input-bg, var(--bs-body-bg))',
+                    color: 'var(--bs-input-color, var(--bs-body-color))',
+                    borderColor: 'var(--bs-border-color)'
+                  }}
+                >
+                  {ip}
+                  <button
+                    type="button"
+                    className="btn btn-link p-0 ms-1 text-danger border-0"
+                    style={{ fontSize: '0.85rem' }}
+                    onClick={() => handleRemoveIp(ip)}
+                    aria-label={`Remove ${ip}`}
+                  >
+                    <FontAwesomeIcon icon="times" />
+                  </button>
+                </span>
+              ))}
+              <Form.Control
+                size="sm"
+                value={ipInput}
+                onChange={(e) => {
+                  setIpInput(e.target.value);
+                  setIpError('');
+                }}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddIp(e)}
+                placeholder="Add IP"
+                className="border-0 shadow-none flex-grow-1 rounded-0 p-0 bg-transparent"
+                style={{
+                  minWidth: '100px',
+                  color: 'inherit',
+                  backgroundColor: 'transparent'
+                }}
+              />
+            </div>
+            {ipError && <Form.Text className="text-danger">{ipError}</Form.Text>}
+          </Form.Group>
         </Forms>
       </UseModal>
 

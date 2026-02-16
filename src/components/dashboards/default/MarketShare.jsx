@@ -85,7 +85,7 @@ const MarketShareItem = ({ item, index, total }) => {
   );
 };
 
-const MarketShare = ({ data, radius }) => {
+const MarketShare = ({ data, radius, label }) => {
   const { getThemeColor } = useAppContext();
   const total = data.reduce((acc, val) => val.value + acc, 0);
   return (
@@ -93,7 +93,7 @@ const MarketShare = ({ data, radius }) => {
       <Card.Body>
         <Row className="justify-content-between g-0">
           <Col xs={5} sm={6} xxl className="pe-2">
-            <h6 className="mt-1">Market Share</h6>
+            <h6 className="mt-1">{label}</h6>
 
             {data.map((item, index) => (
               <MarketShareItem

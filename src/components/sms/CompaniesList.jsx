@@ -3,14 +3,14 @@ import { Button } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { UseTable, Search, TableExportSelect, ConfirmDelete } from 'components/common/UseTable';
 import TablePageLayout from 'components/common/TablePageLayout';
-import HttpConnectionFormModal from 'components/sms/forms/HttpConnectionFormModal';
+import CompanyFormModal from 'components/sms/forms/CompanyFormModal';
 
-const CONNECTION_COLUMNS = (onEdit, onDelete) => [
-  { title: 'Connection Name', dataIndex: 'name', key: 'name' },
-  { title: 'Endpoint', dataIndex: 'endpoint', key: 'endpoint' },
-  { title: 'Auth Type', dataIndex: 'authType', key: 'authType' },
+const COMPANY_COLUMNS = (onEdit, onDelete) => [
+  { title: 'Company', dataIndex: 'name', key: 'name' },
+  { title: 'Plan', dataIndex: 'subscriptionPlan', key: 'subscriptionPlan' },
+  { title: 'Currency', dataIndex: 'currency', key: 'currency' },
+  { title: 'TPS', dataIndex: 'tpsLimit', key: 'tpsLimit', align: 'right' },
   { title: 'Status', dataIndex: 'status', key: 'status' },
-  { title: 'Last Used', dataIndex: 'lastUsed', key: 'lastUsed' },
   {
     title: 'Actions',
     key: 'actions',
@@ -41,7 +41,7 @@ const CONNECTION_COLUMNS = (onEdit, onDelete) => [
   }
 ];
 
-const ListHttpConnections = () => {
+const CompaniesList = () => {
   const [data, setData] = useState([]);
   const [loading] = useState(false);
   const [query, setQuery] = useState('');
@@ -51,7 +51,7 @@ const ListHttpConnections = () => {
 
   const columns = useMemo(
     () =>
-      CONNECTION_COLUMNS(
+      COMPANY_COLUMNS(
         (record) => {
           setRecordForEdit(record);
           setModalShow(true);
@@ -68,7 +68,7 @@ const ListHttpConnections = () => {
     if (query) {
       const q = query.toLowerCase();
       list = list.filter((row) =>
-        [row.name, row.endpoint, row.authType, row.status, row.lastUsed]
+        [row.name, row.subscriptionPlan, row.currency, row.tpsLimit, row.status]
           .filter(Boolean)
           .some((value) => String(value).toLowerCase().includes(q))
       );
@@ -98,14 +98,14 @@ const ListHttpConnections = () => {
   return (
     <>
       <TablePageLayout
-        title="Company Connections"
-        subtitle="Manage HTTP company connections and credentials."
+        title="Companies"
+        subtitle="Manage tenant companies, limits, and billing settings."
         toolbar={
           <>
             <div className="d-flex gap-2 flex-wrap align-items-center">
               <Button variant="primary" size="sm" className="table-page-addButton" onClick={handleAdd}>
                 <FontAwesomeIcon icon="plus" className="me-1" />
-                Add Connection
+                Add Company
               </Button>
               <TableExportSelect
                 onExport={(type) => {
@@ -125,7 +125,7 @@ const ListHttpConnections = () => {
         <TableContainer dataSource={filteredData} loading={loading} rowKey={(r) => r.id ?? r.name} />
       </TablePageLayout>
 
-      <HttpConnectionFormModal
+      <CompanyFormModal
         show={modalShow}
         record={recordForEdit}
         onClose={handleCloseModal}
@@ -136,11 +136,11 @@ const ListHttpConnections = () => {
         show={!!deleteTarget}
         onHide={() => setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
-        title="Delete Connection"
-        message="Are you sure you want to delete this connection? This action cannot be undone."
+        title="Delete Company"
+        message="Are you sure you want to delete this company? This action cannot be undone."
       />
     </>
   );
 };
 
-export default ListHttpConnections;
+export default CompaniesList;

@@ -1,63 +1,63 @@
 import React, { useMemo, useState } from 'react';
-import { Button } from 'react-bootstrap';
+import { Button, Badge } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { UseTable, Search, TableExportSelect, ConfirmDelete } from 'components/common/UseTable';
+import { UseTable, Search, TableExportSelect } from 'components/common/UseTable';
 import TablePageLayout from 'components/common/TablePageLayout';
-import HttpConnectionFormModal from 'components/sms/forms/HttpConnectionFormModal';
+import SubscriptionFormModal from 'components/sms/forms/SubscriptionFormModal';
 
-const CONNECTION_COLUMNS = (onEdit, onDelete) => [
-  { title: 'Connection Name', dataIndex: 'name', key: 'name' },
-  { title: 'Endpoint', dataIndex: 'endpoint', key: 'endpoint' },
-  { title: 'Auth Type', dataIndex: 'authType', key: 'authType' },
-  { title: 'Status', dataIndex: 'status', key: 'status' },
-  { title: 'Last Used', dataIndex: 'lastUsed', key: 'lastUsed' },
+const SUBSCRIPTION_COLUMNS = (onEdit) => [
+  { title: 'Plan Name', dataIndex: 'name', key: 'name' },
+  { title: 'Monthly Price', dataIndex: 'price', key: 'price', render: (v) => `$${v}/month` },
+  { title: 'TPS Limit', dataIndex: 'tps', key: 'tps' },
   {
-    title: 'Actions',
-    key: 'actions',
+    title: 'Status',
+    dataIndex: 'status',
+    key: 'status',
+    render: (value) => (
+      <Badge bg={value === 'Active' ? 'success' : 'secondary'} className="text-uppercase">
+        {value || '—'}
+      </Badge>
+    )
+  },
+  { title: 'Created', dataIndex: 'createdAt', key: 'createdAt' },
+  {
+    title: 'Action',
+    key: 'action',
     align: 'center',
-    width: 100,
+    width: 90,
     render: (_, record) => (
       <div className="d-flex justify-content-center gap-1">
         <Button
-          variant="link"
+          variant="warning"
           size="sm"
-          className="p-0 me-1 text-700"
+          className="px-2 py-0"
           onClick={() => onEdit(record)}
           title="Edit"
         >
           <FontAwesomeIcon icon="edit" />
-        </Button>
-        <Button
-          variant="link"
-          size="sm"
-          className="p-0 text-danger"
-          onClick={() => onDelete(record)}
-          title="Delete"
-        >
-          <FontAwesomeIcon icon="trash-alt" />
         </Button>
       </div>
     )
   }
 ];
 
-const ListHttpConnections = () => {
-  const [data, setData] = useState([]);
+const Subscriptions = () => {
+  const [data] = useState([
+    { id: 1, name: 'Starter', price: 200, tps: 20,  createdAt: '2026-02-01',status: 'Active' },
+    { id: 2, name: 'Growth', price: 300, tps: 30, createdAt: '2026-02-05', status: 'Active' },
+    { id: 3, name: 'Enterprise', price: 500, tps: 100, createdAt: '2026-02-10', status: 'Active' }
+  ]);
   const [loading] = useState(false);
   const [query, setQuery] = useState('');
   const [modalShow, setModalShow] = useState(false);
   const [recordForEdit, setRecordForEdit] = useState(null);
-  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const columns = useMemo(
     () =>
-      CONNECTION_COLUMNS(
-        (record) => {
-          setRecordForEdit(record);
-          setModalShow(true);
-        },
-        (record) => setDeleteTarget(record)
-      ),
+      SUBSCRIPTION_COLUMNS((record) => {
+        setRecordForEdit(record);
+        setModalShow(true);
+      }),
     []
   );
 
@@ -68,9 +68,9 @@ const ListHttpConnections = () => {
     if (query) {
       const q = query.toLowerCase();
       list = list.filter((row) =>
-        [row.name, row.endpoint, row.authType, row.status, row.lastUsed]
-          .filter(Boolean)
-          .some((value) => String(value).toLowerCase().includes(q))
+        [row.name, row.price, row.tps, row.status, row.createdAt]
+          .filter((v) => v != null)
+          .some((val) => String(val).toLowerCase().includes(q))
       );
     }
     return list;
@@ -86,11 +86,6 @@ const ListHttpConnections = () => {
     setRecordForEdit(null);
   };
 
-  const handleConfirmDelete = () => {
-    if (deleteTarget) setData((prev) => prev.filter((r) => r.id !== deleteTarget.id));
-    setDeleteTarget(null);
-  };
-
   const handleSubmit = () => {
     handleCloseModal();
   };
@@ -98,14 +93,14 @@ const ListHttpConnections = () => {
   return (
     <>
       <TablePageLayout
-        title="Company Connections"
-        subtitle="Manage HTTP company connections and credentials."
+        title="Subscriptions"
+        subtitle="Create and manage subscription plans and TPS limits."
         toolbar={
           <>
             <div className="d-flex gap-2 flex-wrap align-items-center">
               <Button variant="primary" size="sm" className="table-page-addButton" onClick={handleAdd}>
                 <FontAwesomeIcon icon="plus" className="me-1" />
-                Add Connection
+                Create Subscription
               </Button>
               <TableExportSelect
                 onExport={(type) => {
@@ -116,7 +111,7 @@ const ListHttpConnections = () => {
             <Search
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="search ..."
+              placeholder="Search ..."
               className="table-page-search"
             />
           </>
@@ -125,22 +120,14 @@ const ListHttpConnections = () => {
         <TableContainer dataSource={filteredData} loading={loading} rowKey={(r) => r.id ?? r.name} />
       </TablePageLayout>
 
-      <HttpConnectionFormModal
+      <SubscriptionFormModal
         show={modalShow}
         record={recordForEdit}
         onClose={handleCloseModal}
         onSubmit={handleSubmit}
       />
-
-      <ConfirmDelete
-        show={!!deleteTarget}
-        onHide={() => setDeleteTarget(null)}
-        onConfirm={handleConfirmDelete}
-        title="Delete Connection"
-        message="Are you sure you want to delete this connection? This action cannot be undone."
-      />
     </>
   );
 };
 
-export default ListHttpConnections;
+export default Subscriptions;

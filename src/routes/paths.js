@@ -46,7 +46,7 @@ export default {
   starter: `/${rootPaths.pagesRoot}/starter`,
   error404: `/${rootPaths.errorsRoot}/404`,
   error500: `/${rootPaths.errorsRoot}/500`,
-  simpleLogin: `/${rootPaths.authRoot}/${rootPaths.authSimpleRoot}/login`,
+  simpleLogin: '/login',
   simpleRegister: `/${rootPaths.authRoot}/${rootPaths.authSimpleRoot}/register`,
   simpleLogout: `/${rootPaths.authRoot}/${rootPaths.authSimpleRoot}/logout`,
   simpleForgotPassword: `/${rootPaths.authRoot}/${rootPaths.authSimpleRoot}/forgot-password`,
@@ -175,6 +175,7 @@ export default {
   // SMS Platform paths
   smsDashboard: `/${rootPaths.smsRoot}/dashboard`,
   // Domain
+  smsDomainList: `/${rootPaths.smsRoot}/domain/list`,
   smsNewDomain: `/${rootPaths.smsRoot}/domain/new`,
   // Providers (Careers in HTML)
   smsAddProvider: `/${rootPaths.smsRoot}/providers/add`,
@@ -182,6 +183,7 @@ export default {
   // Companies (HTTP Connections)
   smsHttpConnections: `/${rootPaths.smsRoot}/companies/connections`,
   smsListHttpConnections: `/${rootPaths.smsRoot}/companies/list`,
+  smsCompaniesList: `/${rootPaths.smsRoot}/companies/list`,
   // Account
   smsAccountSettings: `/${rootPaths.smsRoot}/account/settings`,
   smsAccountBilling: `/${rootPaths.smsRoot}/account/billing`,
@@ -194,6 +196,8 @@ export default {
   smsUsersAdmins: `/${rootPaths.smsRoot}/users/admins`,
   smsUsersAgents: `/${rootPaths.smsRoot}/users/agents`,
   smsUsersClients: `/${rootPaths.smsRoot}/users/clients`,
+  smsUsersList: `/${rootPaths.smsRoot}/users/list`,
+  smsRolesList: `/${rootPaths.smsRoot}/users/roles`,
   // Rate Card
   smsRateCardNumbers: `/${rootPaths.smsRoot}/ratecard/numbers`,
   smsNewNumbers: `/${rootPaths.smsRoot}/ratecard/new`,
@@ -225,6 +229,9 @@ export default {
   smsPaymentRequests: `/${rootPaths.smsRoot}/payment/requests`,
   smsAdminPaymentRequests: `/${rootPaths.smsRoot}/payment/admin-requests`,
   smsPaymentCurrencies: `/${rootPaths.smsRoot}/payment/currencies`,
+  smsSubscriptions: `/${rootPaths.smsRoot}/payment/subscriptions`,
+  // Accounting
+  smsAuditLogs: `/${rootPaths.smsRoot}/accounting/audit-logs`,
   // Chat & Support
   smsPrivateChat: `/${rootPaths.smsRoot}/chat/private`,
   smsInboxMessages: `/${rootPaths.smsRoot}/inbox/messages`,

@@ -6,6 +6,7 @@ import './TablePage.css';
 const TablePageLayout = ({
   title,
   subtitle,
+  topContent,
   toolbar,
   children,
   className,
@@ -20,8 +21,9 @@ const TablePageLayout = ({
         </Card.Header>
       )}
       <Card.Body>
+        {topContent && <div className="mb-3">{topContent}</div>}
         {toolbar && (
-          <TableToolbar className="table-page-toolbar justify-content-between flex-wrap gap-2">
+          <TableToolbar className="table-page-toolbar justify-content-end flex-wrap gap-0">
             {toolbar}
           </TableToolbar>
         )}

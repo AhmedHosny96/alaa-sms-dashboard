@@ -75,7 +75,7 @@ const ProviderFormModal = ({ show, onClose, record, onSubmit }) => {
 
   return (
     <UseModal
-      title={record ? 'Edit SMS Provider' : 'Add New SMS Provider'}
+      title={record ? 'Edit Carrier' : 'Add New Carrier'}
       isVisible={show}
       setIsVisible={() => {}}
       onCancel={onClose}
@@ -90,12 +90,12 @@ const ProviderFormModal = ({ show, onClose, record, onSubmit }) => {
       ]}
     >
       <Forms id="provider-form" onFinish={handleProviderSubmit}>
-        <h6 className="text-900 mb-2">Provider details</h6>
+        <h6 className="text-900 mb-2">Carrier details</h6>
         <Row>
           <Col md={6}>
             <UseInput
               name="providerName"
-              label="Provider Name"
+              label="Carrier Name"
               value={values.providerName}
               onChange={handleOnChange}
               placeholder="Name"

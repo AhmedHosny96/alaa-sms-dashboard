@@ -74,7 +74,7 @@ const BestSellingProducts = ({ products }) => {
         <Table borderless responsive className="mb-0 fs-10">
           <thead className="bg-body-tertiary">
             <tr>
-              <th className="text-900">Best Selling Products</th>
+              <th className="text-900">Top SIDs</th>
               <th className="text-900 text-end">Revenue ( ${totalPrice})</th>
               <th className="pe-x1 text-900 text-end" style={{ width: '8rem' }}>
                 Revenue (%)

@@ -9,6 +9,9 @@ import iconZip from 'assets/img/icons/zip.png';
 import product2 from 'assets/img/products/2.jpg';
 import product3 from 'assets/img/products/3.jpg';
 import product5 from 'assets/img/products/5.jpg';
+import logoAmazon from 'assets/img/logos/amazon.png';
+import logoFacebook from 'assets/img/logos/facebook.png';
+import logoYoutube from 'assets/img/logos/youtube.png';
 
 import team1 from 'assets/img/team/1.jpg';
 import team2 from 'assets/img/team/2.jpg';
@@ -17,6 +20,12 @@ import team4 from 'assets/img/team/4.jpg';
 import team5 from 'assets/img/team/5.jpg';
 import team6 from 'assets/img/team/6.jpg';
 import team7 from 'assets/img/team/7.jpg';
+import india from 'assets/img/country/india.png';
+import uae from 'assets/img/country/uae.png';
+import nepal from 'assets/img/country/nepal.png';
+import thailand from 'assets/img/country/thailand.png';
+import palestine from 'assets/img/country/palestine.svg';
+import france from 'assets/img/country/france.svg';
 
 export const weeklySalesData = [6000, 9000, 8500, 4000, 4500, 6500, 7000];
 
@@ -55,79 +64,92 @@ export const products = [
   {
     id: 1,
     img: product12,
-    title: 'Raven Pro',
-    type: 'Landing',
-    unit: 19,
-    price: 69
+    title: 'TikTok',
+    type: 'App',
+    unit: 120,
+    price: 49
   },
   {
     id: 2,
-    img: product10,
-    title: 'Boots4',
-    type: 'Portfolio',
-    unit: 10,
-    price: 86
+    img: logoFacebook,
+    title: 'Facebook',
+    type: 'App',
+    unit: 95,
+    price: 39
   },
   {
     id: 3,
-    img: product11,
-    title: 'Falcon',
-    type: 'Admin',
-    unit: 11,
-    price: 49
+    img: logoYoutube,
+    title: 'YouTube',
+    type: 'App',
+    unit: 150,
+    price: 59
   },
   {
     id: 4,
-    img: product14,
-    title: 'Slick',
-    type: 'Builder',
-    unit: 5,
-    price: 49
+    img: logoAmazon,
+    title: 'Amazon',
+    type: 'Web',
+    unit: 140,
+    price: 79
   },
   {
     id: 5,
     img: product13,
-    title: 'Reign Pro',
-    type: 'Agency',
-    unit: 6,
-    price: 39
+    title: 'Shein',
+    type: 'Web',
+    unit: 80,
+    price: 29
+  },
+  {
+    id: 6,
+    img: product10,
+    title: 'WhatsApp',
+    type: 'App',
+    unit: 110,
+    price: 69
   }
 ];
 
 export const runningProjects = [
   {
     id: 1,
-    title: 'Falcon',
+    title: 'Palestine',
     progress: 90,
     duration: '58:20:00',
+    flag: palestine,
     color: 'primary'
   },
   {
     id: 2,
-    title: 'Reign',
+    title: 'UAE',
     progress: 78,
     duration: '31:50:00',
+    flag: uae,
     color: 'success'
   },
   {
     id: 3,
-    title: 'Boots4',
+    title: 'Nepal',
     progress: 79,
     duration: '25:20:00',
+    flag: nepal,
     color: 'info'
   },
   {
     id: 4,
-    title: 'Raven',
+    title: 'France',
     progress: 38,
     duration: '12:50:00',
+    flag: france,
     color: 'warning'
   },
   {
     id: 5,
-    title: 'Slick',
+    title: 'India',
     progress: 40,
     duration: '21:20:00',
+    flag: india,
     color: 'danger'
   }
 ];

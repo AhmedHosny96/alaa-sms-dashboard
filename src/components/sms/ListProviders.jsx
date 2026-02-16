@@ -6,7 +6,7 @@ import TablePageLayout from 'components/common/TablePageLayout';
 import ProviderFormModal from 'components/sms/forms/ProviderFormModal';
 
 const PROVIDERS_COLUMNS = (onEdit, onDelete) => [
-  { title: 'Provider Name', dataIndex: 'name', key: 'name' },
+  { title: 'Carrier Name', dataIndex: 'name', key: 'name' },
   { title: 'Type', dataIndex: 'type', key: 'type' },
   { title: 'Host', dataIndex: 'host', key: 'host' },
   { title: 'Status', dataIndex: 'status', key: 'status' },
@@ -81,14 +81,14 @@ const ListProviders = () => {
   return (
     <>
     <TablePageLayout
-      title="SMS Providers"
-      subtitle="View and manage all configured SMS providers. Add and edit from this page."
+      title="Carriers"
+      subtitle="View and manage all configured carriers. Add and edit from this page."
       toolbar={
         <>
           <div className="d-flex gap-2 flex-wrap align-items-center">
             <Button variant="primary" size="sm" className="table-page-addButton" onClick={handleAdd}>
               <FontAwesomeIcon icon="plus" className="me-1" />
-              Add SMS Provider
+              Add Carrier
             </Button>
             <TableExportSelect
               onExport={(type) => {

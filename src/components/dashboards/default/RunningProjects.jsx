@@ -6,7 +6,7 @@ import React from 'react';
 import { Badge, Card, Col, Form, ProgressBar, Row } from 'react-bootstrap';
 
 const Project = ({ project, isLast }) => {
-  const { color, progress, duration, title } = project;
+  const { color, progress, duration, title, flag } = project;
   return (
     <Row
       className={classNames('position-relative align-items-center py-2 g-0', {
@@ -16,11 +16,15 @@ const Project = ({ project, isLast }) => {
       <Col className="py-1 ps-x1">
         <Flex className="align-items-center">
           <div className="avatar avatar-xl me-3">
-            <div className={`avatar-name rounded-circle bg-${color}-subtle`}>
-              <span className={`fs-9 text-${color.split('-')[1] || color}`}>
-                {title[0]}
-              </span>
-            </div>
+            {flag ? (
+              <img className="rounded-circle" src={flag} alt={title} />
+            ) : (
+              <div className={`avatar-name rounded-circle bg-${color}-subtle`}>
+                <span className={`fs-9 text-${color.split('-')[1] || color}`}>
+                  {title[0]}
+                </span>
+              </div>
+            )}
           </div>
           <Flex tag="h6" className="mb-0 align-items-center">
             <a className="text-800 stretched-link" href="#!">
@@ -50,7 +54,7 @@ const RunningProjects = ({ data }) => {
   return (
     <Card>
       <FalconCardHeader
-        title="Running Projects"
+        title="Top Destinations"
         light
         titleTag="h6"
         endEl={

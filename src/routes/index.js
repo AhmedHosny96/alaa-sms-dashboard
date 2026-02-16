@@ -200,16 +200,15 @@ import QuickLinks from 'components/app/support-desk/quick-links/QuickLinks';
 import Reports from 'components/app/support-desk/reports/Reports';
 // SMS Platform Components
 import SmsDashboard from 'components/sms/SmsDashboard';
+import DomainList from 'components/sms/DomainList';
 import ListProviders from 'components/sms/ListProviders';
-import HttpConnections from 'components/sms/HttpConnections';
-import ListHttpConnections from 'components/sms/ListHttpConnections';
+import CompaniesList from 'components/sms/CompaniesList';
 import AccountSettings from 'components/sms/AccountSettings';
 import AccountBilling from 'components/sms/AccountBilling';
 import ApiKeys from 'components/sms/ApiKeys';
 import AccountOverview from 'components/sms/AccountOverview';
-import AdminUsers from 'components/sms/AdminUsers';
-import AgentUsers from 'components/sms/AgentUsers';
-import ClientUsers from 'components/sms/ClientUsers';
+import UserList from 'components/sms/users/UserList';
+import RoleList from 'components/sms/roles/RoleList';
 import RateCardNumbers from 'components/sms/RateCardNumbers';
 import TestListNumbers from 'components/sms/TestListNumbers';
 import TestCdrs from 'components/sms/TestCdrs';
@@ -231,9 +230,11 @@ import Bills from 'components/sms/Bills';
 import PaymentRequests from 'components/sms/PaymentRequests';
 import AdminPaymentRequests from 'components/sms/AdminPaymentRequests';
 import PaymentCurrencies from 'components/sms/PaymentCurrencies';
+import Subscriptions from 'components/sms/Subscriptions';
 import PrivateChat from 'components/sms/PrivateChat';
 import InboxMessages from 'components/sms/InboxMessages';
 import FaqExtended from 'components/sms/FaqExtended';
+import AuditLogs from 'components/sms/AuditLogs';
 import InputMaskExample from 'components/doc-components/InputMaskExample';
 import RangeSlider from 'components/doc-components/RangeSlider';
 import VerticalNavLayout from 'layouts/VerticalNavLayout';
@@ -241,6 +242,7 @@ import TopNavLayout from 'layouts/TopNavLayout';
 import ComboNavLayout from 'layouts/ComboNavLayout';
 import DoubleTopNavLayout from 'layouts/DoubleTopNavLayout';
 import FalconLoader from 'components/common/FalconLoader';
+import RequireAuth from 'components/authentication/RequireAuth';
 
 const routes = [
   {
@@ -248,7 +250,11 @@ const routes = [
     children: [
       {
         path: 'landing',
-        element: <Landing />
+        element: (
+          <RequireAuth>
+            <Landing />
+          </RequireAuth>
+        )
       },
       {
         path: rootPaths.errorsRoot,
@@ -271,10 +277,6 @@ const routes = [
             path: rootPaths.authSimpleRoot,
             element: <AuthSimpleLayout />,
             children: [
-              {
-                path: paths.simpleLogin,
-                element: <SimpleLogin />
-              },
               {
                 path: paths.simpleRegister,
                 element: <SimpleRegistration />
@@ -374,8 +376,22 @@ const routes = [
         ]
       },
       {
+        path: paths.simpleLogin,
+        element: <AuthSimpleLayout />,
+        children: [
+          {
+            index: true,
+            element: <SimpleLogin />
+          }
+        ]
+      },
+      {
         path: '/',
-        element: <MainLayout />,
+        element: (
+          <RequireAuth>
+            <MainLayout />
+          </RequireAuth>
+        ),
         children: [
           {
             index: true,
@@ -417,28 +433,38 @@ const routes = [
                 path: 'dashboard',
                 element: <SmsDashboard />
               },
+              // Domain
+              {
+                path: 'domain/list',
+                element: <DomainList />
+              },
               // Domain (add/edit on list page)
               {
                 path: 'domain/new',
-                element: <Navigate to={`/${rootPaths.smsRoot}/iprn/range-providers`} replace />
+                element: <Navigate to={`/${rootPaths.smsRoot}/domain/list`} replace />
               },
               // Providers (moved to IPRN range providers)
               {
                 path: 'providers/add',
-                element: <Navigate to={`/${rootPaths.smsRoot}/iprn/range-providers`} replace />
+                element: <Navigate to={`/${rootPaths.smsRoot}/providers/list`} replace />
               },
               {
                 path: 'providers/list',
-                element: <Navigate to={`/${rootPaths.smsRoot}/iprn/range-providers`} replace />
+                element: <ListProviders />
               },
               // Companies (HTTP Connections)
               {
                 path: 'companies/connections',
-                element: <HttpConnections />
+                element: <Navigate to={`/${rootPaths.smsRoot}/companies/list`} replace />
               },
               {
                 path: 'companies/list',
-                element: <ListHttpConnections />
+                element: <CompaniesList />
+              },
+              // Accounting
+              {
+                path: 'accounting/audit-logs',
+                element: <AuditLogs />
               },
               // Account
               {
@@ -460,27 +486,35 @@ const routes = [
               // User Management (add/edit on list page)
               {
                 path: 'users/add',
-                element: <Navigate to={`/${rootPaths.smsRoot}/users/admins`} replace />
+                element: <Navigate to={`/${rootPaths.smsRoot}/users/list`} replace />
               },
               {
                 path: 'users/edit',
-                element: <Navigate to={`/${rootPaths.smsRoot}/users/admins`} replace />
+                element: <Navigate to={`/${rootPaths.smsRoot}/users/list`} replace />
               },
               {
                 path: 'users/view',
-                element: <Navigate to={`/${rootPaths.smsRoot}/users/admins`} replace />
+                element: <Navigate to={`/${rootPaths.smsRoot}/users/list`} replace />
+              },
+              {
+                path: 'users/list',
+                element: <UserList />
+              },
+              {
+                path: 'users/roles',
+                element: <RoleList />
               },
               {
                 path: 'users/admins',
-                element: <AdminUsers />
+                element: <Navigate to={`/${rootPaths.smsRoot}/users/list`} replace />
               },
               {
                 path: 'users/agents',
-                element: <AgentUsers />
+                element: <Navigate to={`/${rootPaths.smsRoot}/users/list`} replace />
               },
               {
                 path: 'users/clients',
-                element: <ClientUsers />
+                element: <Navigate to={`/${rootPaths.smsRoot}/users/list`} replace />
               },
               // Rate Card (add on list page)
               {
@@ -576,11 +610,15 @@ const routes = [
               },
               {
                 path: 'payment/admin-requests',
-                element: <AdminPaymentRequests />
+                element: <Navigate to={`/${rootPaths.smsRoot}/payment/requests`} replace />
               },
               {
                 path: 'payment/currencies',
                 element: <PaymentCurrencies />
+              },
+              {
+                path: 'payment/subscriptions',
+                element: <Subscriptions />
               },
               // Chat & Support
               {
@@ -1395,7 +1433,11 @@ const routes = [
       },
       {
         path: '/',
-        element: <VerticalNavLayout />,
+        element: (
+          <RequireAuth>
+            <VerticalNavLayout />
+          </RequireAuth>
+        ),
         children: [
           {
             path: paths.verticalNavLayout,
@@ -1405,7 +1447,11 @@ const routes = [
       },
       {
         path: '/',
-        element: <TopNavLayout />,
+        element: (
+          <RequireAuth>
+            <TopNavLayout />
+          </RequireAuth>
+        ),
         children: [
           {
             path: paths.topNavLayout,
@@ -1415,7 +1461,11 @@ const routes = [
       },
       {
         path: '/',
-        element: <ComboNavLayout />,
+        element: (
+          <RequireAuth>
+            <ComboNavLayout />
+          </RequireAuth>
+        ),
         children: [
           {
             path: paths.comboNavLayout,
@@ -1425,7 +1475,11 @@ const routes = [
       },
       {
         path: '/',
-        element: <DoubleTopNavLayout />,
+        element: (
+          <RequireAuth>
+            <DoubleTopNavLayout />
+          </RequireAuth>
+        ),
         children: [
           {
             path: paths.doubleTopNavLayout,

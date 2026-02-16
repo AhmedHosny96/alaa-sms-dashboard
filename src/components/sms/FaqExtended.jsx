@@ -31,7 +31,7 @@ const FaqExtended = () => (
               <Accordion.Item eventKey="0">
                 <Accordion.Header>How do I add a new SMS provider?</Accordion.Header>
                 <Accordion.Body>
-                  Navigate to IPRN SMS > SMS Providers and fill in the required connection details including host, port, and authentication credentials.
+                  Navigate to IPRN SMS &gt; SMS Providers and fill in the required connection details including host, port, and authentication credentials.
                 </Accordion.Body>
               </Accordion.Item>
               <Accordion.Item eventKey="1">

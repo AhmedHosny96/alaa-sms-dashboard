@@ -76,7 +76,7 @@ const WeeklySales = ({ data, width, amountClassName }) => {
     <Card className="h-md-100">
       <Card.Header className="pb-0">
         <h6 className="mb-0 mt-2">
-          Weekly Sales
+          Weekly SMS
           <OverlayTrigger
             placement="top"
             overlay={

@@ -2,14 +2,13 @@ import React, { useEffect, useMemo } from 'react';
 import { Button } from 'react-bootstrap';
 import { UseModal, useForm, Forms, UseInput, UseSelect } from 'components/common/UseTable';
 
-const UserFormModal = ({ show, onClose, onSubmit, record, roleLabel, title }) => {
-  const roleOptions = [
-    { id: 'Platform Admin', name: 'Platform Admin' },
-    { id: 'Company Admin', name: 'Company Admin' },
-    { id: 'Company Finance', name: 'Company Finance' },
-    { id: 'Client User', name: 'Client User' },
-    { id: 'Client Finance', name: 'Client Finance' }
+const RoleFormModal = ({ show, onClose, onSubmit, record }) => {
+  const scopeOptions = [
+    { id: 'Platform Owner', name: 'Platform Owner' },
+    { id: 'Company', name: 'Company' },
+    { id: 'Client', name: 'Client' }
   ];
+
   const statusOptions = [
     { id: 'Active', name: 'Active' },
     { id: 'Inactive', name: 'Inactive' }
@@ -18,12 +17,12 @@ const UserFormModal = ({ show, onClose, onSubmit, record, roleLabel, title }) =>
   const initialValues = useMemo(
     () => ({
       name: record?.name ?? '',
-      email: record?.email ?? '',
-      phone: record?.phone ?? '',
-      status: record?.status ?? 'Active',
-      role: record?.role ?? roleLabel ?? 'Company Admin'
+      description: record?.description ?? '',
+      scope: record?.scope ?? 'Company',
+      permissions: record?.permissions ?? '',
+      status: record?.status ?? 'Active'
     }),
-    [record, roleLabel]
+    [record]
   );
 
   const { values, setValues, handleOnChange } = useForm(initialValues);
@@ -39,7 +38,7 @@ const UserFormModal = ({ show, onClose, onSubmit, record, roleLabel, title }) =>
 
   return (
     <UseModal
-      title={title || (record ? `Edit ${roleLabel}` : `Add ${roleLabel}`)}
+      title={record ? 'Edit Role' : 'Add Role'}
       isVisible={show}
       setIsVisible={() => {}}
       onCancel={onClose}
@@ -47,41 +46,44 @@ const UserFormModal = ({ show, onClose, onSubmit, record, roleLabel, title }) =>
         <Button key="cancel" variant="secondary" size="sm" onClick={onClose}>
           Cancel
         </Button>,
-        <Button key="submit" variant="primary" size="sm" type="submit" form="user-form">
+        <Button key="submit" variant="primary" size="sm" type="submit" form="role-form">
           {record ? 'Update' : 'Save'}
         </Button>
       ]}
     >
-      <Forms id="user-form" onFinish={handleSubmit}>
+      <Forms id="role-form" onFinish={handleSubmit}>
         <UseInput
           name="name"
-          label="Full Name"
+          label="Role Name"
           value={values.name}
           onChange={handleOnChange}
-          placeholder="John Doe"
+          placeholder="Company Admin"
         />
         <UseInput
-          name="email"
-          label="Email"
-          type="email"
-          value={values.email}
+          name="description"
+          label="Description"
+          value={values.description}
           onChange={handleOnChange}
-          placeholder="user@example.com"
-        />
-        <UseInput
-          name="phone"
-          label="Phone"
-          value={values.phone}
-          onChange={handleOnChange}
-          placeholder="+1 555 000 000"
+          placeholder="Full access to company resources"
+          as="textarea"
+          rows={3}
         />
         <UseSelect
-          name="role"
-          label="User Type"
-          value={values.role}
-          options={roleOptions}
-          onChange={(v) => setValues((prev) => ({ ...prev, role: v }))}
-          placeholder="Select user type"
+          name="scope"
+          label="Scope"
+          value={values.scope}
+          options={scopeOptions}
+          onChange={(value) => setValues((prev) => ({ ...prev, scope: value }))}
+          placeholder="Select scope"
+        />
+        <UseInput
+          name="permissions"
+          label="Permissions"
+          value={values.permissions}
+          onChange={handleOnChange}
+          placeholder="users.read, users.write, billing.read"
+          as="textarea"
+          rows={3}
         />
         {record && (
           <UseSelect
@@ -89,7 +91,7 @@ const UserFormModal = ({ show, onClose, onSubmit, record, roleLabel, title }) =>
             label="Status"
             value={values.status}
             options={statusOptions}
-            onChange={(v) => setValues((prev) => ({ ...prev, status: v }))}
+            onChange={(value) => setValues((prev) => ({ ...prev, status: value }))}
             placeholder="Select status"
           />
         )}
@@ -98,4 +100,4 @@ const UserFormModal = ({ show, onClose, onSubmit, record, roleLabel, title }) =>
   );
 };
 
-export default UserFormModal;
+export default RoleFormModal;
