@@ -4,12 +4,11 @@ import { UseModal, useForm, Forms, UseInput, UseSelect } from 'components/common
 
 const payoutTiers = ['1/1', '7/1', '7/7', '15/15', '15/30', '30/15', '30/30', '30/45', '30/60'];
 
-const RangeFormModal = ({ show, onClose, record, onSubmit }) => {
-  const providerOptions = [
-    { id: '', name: 'Select Provider' },
-    { id: 'provider-1', name: 'Provider 1' },
-    { id: 'provider-2', name: 'Provider 2' }
-  ];
+const RangeFormModal = ({ show, onClose, record, onSubmit, providerOptions: externalProviderOptions }) => {
+  const providerOptions =
+    Array.isArray(externalProviderOptions) && externalProviderOptions.length > 0
+      ? externalProviderOptions
+      : [];
   const paymentTermOptions = [
     { id: '1/1', name: '1/1' },
     { id: '7/1', name: '7/1' },
@@ -32,12 +31,13 @@ const RangeFormModal = ({ show, onClose, record, onSubmit }) => {
       providerId: record?.providerId ?? '',
       rangeName: record?.rangeName ?? '',
       rangePrefix: record?.rangePrefix ?? '',
+      testNumber: record?.testNumber ?? '',
       paymentTerm: record?.paymentTerm ?? '',
       currency: record?.currency ?? '',
       payout: record?.payout ?? '',
       maxSmsLimitDay: record?.maxSmsLimitDay ?? '',
       memoText: record?.memoText ?? '',
-      cliLimitsList: record?.cliLimitsList ?? '',
+      cliLimitsList: record?.cliLimitsList ?? record?.cliList ?? '',
       agentOverrides: record?.agentOverrides ?? true,
       applyAllType: 'flat',
       applyAllValue: ''
@@ -46,6 +46,11 @@ const RangeFormModal = ({ show, onClose, record, onSubmit }) => {
   );
 
   const { values, setValues, handleOnChange } = useForm(initialRangeValues);
+
+  const selectedProviderName = useMemo(() => {
+    if (!values.providerId) return '—';
+    return providerOptions.find((option) => String(option.id) === String(values.providerId))?.name || values.providerId;
+  }, [providerOptions, values.providerId]);
 
   useEffect(() => {
     if (show) setValues(initialRangeValues);
@@ -118,6 +123,15 @@ const RangeFormModal = ({ show, onClose, record, onSubmit }) => {
                       />
                     </Col>
                     <Col md={6}>
+                      <UseInput
+                        name="testNumber"
+                        label="Test Number"
+                        value={values.testNumber}
+                        onChange={handleOnChange}
+                        placeholder="201556591145"
+                      />
+                    </Col>
+                    <Col md={6}>
                       <UseSelect
                         name="paymentTerm"
                         label="Payment Term"
@@ -142,9 +156,11 @@ const RangeFormModal = ({ show, onClose, record, onSubmit }) => {
                         name="payout"
                         label="Base Payout"
                         type="number"
+                        min={0}
+                        step={0.001}
                         value={values.payout}
                         onChange={handleOnChange}
-                        placeholder="0"
+                        placeholder="0.0"
                       />
                     </Col>
                   </Row>
@@ -209,7 +225,7 @@ const RangeFormModal = ({ show, onClose, record, onSubmit }) => {
                   <div className="range-summary">
                     <div>
                       <div className="text-700 fs--1">Provider</div>
-                      <div className="fw-semibold">{values.providerId || '—'}</div>
+                      <div className="fw-semibold">{selectedProviderName}</div>
                     </div>
                     <div>
                       <div className="text-700 fs--1">Currency</div>
@@ -225,7 +241,7 @@ const RangeFormModal = ({ show, onClose, record, onSubmit }) => {
                     </div>
                   </div>
                   <div className="range-divider" />
-                  <Form.Check
+                  {/* <Form.Check
                     type="switch"
                     id="agentOverrides"
                     name="agentOverrides"
@@ -233,15 +249,15 @@ const RangeFormModal = ({ show, onClose, record, onSubmit }) => {
                     onChange={handleOnChange}
                     label="Enable agent overrides"
                     className="mb-3"
-                  />
+                  /> */}
                   <Row className="g-2">
-                    <Col xs={5}>
+                    {/* <Col xs={5}>
                       <Form.Select size="sm" name="applyAllType" value={values.applyAllType} onChange={handleOnChange}>
                         <option value="flat">Flat</option>
                         <option value="percent">%</option>
                       </Form.Select>
-                    </Col>
-                    <Col xs={7}>
+                    </Col> */}
+                    {/* <Col xs={7}>
                       <Form.Control
                         size="sm"
                         name="applyAllValue"
@@ -249,7 +265,7 @@ const RangeFormModal = ({ show, onClose, record, onSubmit }) => {
                         onChange={handleOnChange}
                         placeholder="Apply to all tiers"
                       />
-                    </Col>
+                    </Col> */}
                   </Row>
                 </Card.Body>
               </Card>
@@ -291,6 +307,8 @@ const RangeFormModal = ({ show, onClose, record, onSubmit }) => {
                               size="sm"
                               name={`tierValue_${tier.replace('/', '_')}`}
                               type="number"
+                              min={0}
+                              step={0.001}
                               value={values[`tierValue_${tier.replace('/', '_')}`] ?? ''}
                               onChange={handleOnChange}
                               placeholder="0"

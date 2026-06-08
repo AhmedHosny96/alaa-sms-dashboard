@@ -69,12 +69,12 @@ const getOptions = (getThemeColor, data) => ({
   }
 });
 
-const TotalOrder = ({ data }) => {
+const TotalOrder = ({ data, label }) => {
   const { getThemeColor } = useAppContext();
   return (
     <Card className="h-md-100">
       <Card.Header className="pb-0">
-        <h6 className="mb-0 mt-2">Total SMS</h6>
+        <h6 className="mb-0 mt-2">{label}</h6>
       </Card.Header>
 
       <Card.Body

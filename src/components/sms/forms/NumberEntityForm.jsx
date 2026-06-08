@@ -30,7 +30,9 @@ const EntityForm = ({ record, onSubmit, onCancel }) => {
       seriesEnd: '',
       listNumbers: '',
       csvFile: '',
-      isTestNumber: false,
+      // 0 = none, 1/5/10 = first N numbers marked as test category.
+      testNumberCount: record?.isTestNumber ? 1
+        : (String(record?.category ?? '').toLowerCase().includes('test') ? 1 : 0),
       maxSmsDay: '',
       maxSmsWeek: '',
       agentId: record?.agent?.id ?? '',
@@ -174,18 +176,23 @@ const EntityForm = ({ record, onSubmit, onCancel }) => {
             </Col>
             <Col lg={4}>
               <Form.Group className="mb-2">
-                <Form.Label className="fw-semibold">Set First Number as Test Number</Form.Label>
-                <div>
-                  <Form.Check
-                    type="checkbox"
-                    name="isTestNumber"
-                    label="Yes"
-                    checked={!!values.isTestNumber}
-                    onChange={handleOnChange}
-                  />
-                </div>
+                <Form.Label className="fw-semibold">Set First Numbers as Test Numbers</Form.Label>
+                <Form.Select
+                  name="testNumberCount"
+                  size="sm"
+                  value={String(values.testNumberCount ?? 0)}
+                  onChange={(e) =>
+                    setValues((prev) => ({ ...prev, testNumberCount: Number(e.target.value) || 0 }))
+                  }
+                >
+                  <option value="0">None</option>
+                  <option value="1">First 1</option>
+                  <option value="2">First 2</option>
+                  <option value="5">First 5</option>
+                  <option value="10">First 10</option>
+                </Form.Select>
               </Form.Group>
-              <UseInput
+              {/* <UseInput
                 name="maxSmsDay"
                 label="Maximum SMS in Day"
                 type="number"
@@ -200,7 +207,7 @@ const EntityForm = ({ record, onSubmit, onCancel }) => {
                 value={values.maxSmsWeek}
                 onChange={handleOnChange}
                 placeholder="0"
-              />
+              /> */}
             </Col>
             <Col lg={4}>
               <div className="mb-2">
@@ -227,9 +234,11 @@ const EntityForm = ({ record, onSubmit, onCancel }) => {
                 name="agentPayout"
                 label="Agent Payout"
                 type="number"
+                min={0}
+                step={0.001}
                 value={values.agentPayout}
                 onChange={handleOnChange}
-                placeholder="0"
+                placeholder="0.000"
               />
             </Col>
           </Row>

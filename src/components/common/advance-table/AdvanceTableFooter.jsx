@@ -12,17 +12,20 @@ export const AdvanceTableFooter = ({
   className,
   rowInfo,
   rowsPerPageSelection,
-  rowsPerPageOptions = [5, 10, 15]
+  rowsPerPageOptions,
+  totalRowCountOverride
 }) => {
   const {
     setPageSize,
+    setPageIndex,
     previousPage,
     nextPage,
     getCanNextPage,
     getCanPreviousPage,
     getState,
     getPrePaginationRowModel,
-    getPaginationRowModel
+    getPaginationRowModel,
+    perPageOptions: contextPerPageOptions
   } = useAdvanceTableContext();
 
   const {
@@ -30,6 +33,21 @@ export const AdvanceTableFooter = ({
   } = getState();
   const [perPage] = useState(pageSize);
   const [isAllVisible, setIsAllVisible] = useState(false);
+  const defaultPerPageOptions = [25, 50, 100, 500, 1000, 5000];
+  const effectivePerPageOptions =
+    rowsPerPageOptions || contextPerPageOptions || defaultPerPageOptions;
+  const maxSafePageSize = 5000;
+  const totalRows =
+    totalRowCountOverride != null
+      ? totalRowCountOverride
+      : getPrePaginationRowModel().rows.length;
+  const pageRowsCount = getPaginationRowModel().rows.length;
+  const fromRow =
+    totalRows === 0 ? 0 : Math.min(totalRows, pageSize * pageIndex + 1);
+  const toRow =
+    totalRows === 0
+      ? 0
+      : Math.min(totalRows, pageSize * pageIndex + pageRowsCount);
 
   return (
     <Flex
@@ -41,10 +59,15 @@ export const AdvanceTableFooter = ({
       <Flex alignItems="center" className="fs-10">
         {rowInfo && (
           <p className="mb-0">
-            <span className="d-none d-sm-inline-block me-2">
-              {pageSize * pageIndex + 1} to{' '}
-              {pageSize * pageIndex + getPaginationRowModel().rows.length} of{' '}
-              {getPrePaginationRowModel().rows.length}
+            <span className="me-2">
+              <span className="d-none d-sm-inline">Showing </span>
+              <span className="fw-semibold">
+                {fromRow}–{toRow}
+              </span>
+              <span className="d-none d-sm-inline"> of </span>
+              <span className="d-inline d-sm-none"> / </span>
+              <span className="fw-semibold">{totalRows}</span>
+              <span className="d-none d-sm-inline"> entries</span>
             </span>
             {viewAllBtn && (
               <>
@@ -58,11 +81,11 @@ export const AdvanceTableFooter = ({
                     setPageSize(
                       isAllVisible
                         ? perPage
-                        : getPrePaginationRowModel().rows.length
+                        : Math.min(getPrePaginationRowModel().rows.length, maxSafePageSize)
                     );
                   }}
                 >
-                  View {isAllVisible ? 'less' : 'all'}
+                  View {isAllVisible ? 'less' : totalRows > maxSafePageSize ? maxSafePageSize : 'all'}
                   <FontAwesomeIcon
                     icon="chevron-right"
                     className="ms-1 fs-11"
@@ -78,10 +101,13 @@ export const AdvanceTableFooter = ({
             <Form.Select
               size="sm"
               className="w-auto"
-              onChange={e => setPageSize(Number(e.target.value))}
-              defaultValue={pageSize}
+              onChange={e => {
+                setPageSize(Number(e.target.value));
+                setPageIndex(0);
+              }}
+              value={pageSize}
             >
-              {rowsPerPageOptions.map(value => (
+              {effectivePerPageOptions.map(value => (
                 <option value={value} key={value}>
                   {value}
                 </option>
@@ -96,6 +122,7 @@ export const AdvanceTableFooter = ({
             size="sm"
             variant={getCanPreviousPage() ? 'primary' : 'tertiary'}
             onClick={() => previousPage()}
+            disabled={!getCanPreviousPage()}
             className={classNames({ disabled: !getCanPreviousPage() })}
           >
             Previous
@@ -103,6 +130,7 @@ export const AdvanceTableFooter = ({
           <Button
             size="sm"
             variant={getCanNextPage() ? 'primary' : 'tertiary'}
+            disabled={!getCanNextPage()}
             className={classNames('px-4 ms-2', {
               disabled: !getCanNextPage()
             })}

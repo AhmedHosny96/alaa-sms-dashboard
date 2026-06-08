@@ -1,8 +1,8 @@
-version: "3.9"
+
 services:
-  sms-frontend:
+  sms-dashboard:
     build: .
-    container_name: sms-frontend
+    container_name: sms-dashboard
     ports:
       - "8080:80"
     restart: unless-stopped

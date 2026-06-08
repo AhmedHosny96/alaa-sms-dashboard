@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { Button } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { UseTable, Search, TableExportSelect, ConfirmDelete } from 'components/common/UseTable';
+import { UseTable, TableExportSelect, ConfirmDelete } from 'components/common/UseTable';
+import TableSearchInput from 'components/common/TableSearchInput';
 import TablePageLayout from 'components/common/TablePageLayout';
 import HttpConnectionFormModal from 'components/sms/forms/HttpConnectionFormModal';
 
@@ -113,11 +114,11 @@ const ListHttpConnections = () => {
                 }}
               />
             </div>
-            <Search
+            <TableSearchInput
+              className="table-page-filter"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={setQuery}
               placeholder="search ..."
-              className="table-page-search"
             />
           </>
         }

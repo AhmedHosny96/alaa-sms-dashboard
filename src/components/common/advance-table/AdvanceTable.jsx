@@ -8,14 +8,21 @@ const AdvanceTable = ({
   headerClassName,
   bodyClassName,
   rowClassName,
-  tableProps
+  tableProps,
+  emptyMessage = 'No records'
 }) => {
   const table = useAdvanceTableContext();
   const { getRowModel, getFlatHeaders } = table;
+  const rows = getRowModel().rows;
+
+  const mergedTableProps = {
+    ...tableProps,
+    className: classNames('advance-table', tableProps?.className)
+  };
 
   return (
     <div className="table-responsive scrollbar">
-      <Table {...tableProps}>
+      <Table {...mergedTableProps}>
         <thead className={headerClassName}>
           <tr>
             {getFlatHeaders().map(header => {
@@ -46,15 +53,26 @@ const AdvanceTable = ({
           </tr>
         </thead>
         <tbody className={bodyClassName}>
-          {getRowModel().rows.map(row => (
-            <tr key={row.id} className={rowClassName}>
-              {row.getVisibleCells().map(cell => (
-                <td key={cell.id} {...cell.column.columnDef.meta?.cellProps}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
+          {rows.length === 0 ? (
+            <tr>
+              <td
+                colSpan={getFlatHeaders().length || 1}
+                className="text-center text-700 py-5"
+              >
+                {emptyMessage}
+              </td>
             </tr>
-          ))}
+          ) : (
+            rows.map(row => (
+              <tr key={row.id} className={rowClassName}>
+                {row.getVisibleCells().map(cell => (
+                  <td key={cell.id} {...cell.column.columnDef.meta?.cellProps}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))
+          )}
         </tbody>
       </Table>
     </div>

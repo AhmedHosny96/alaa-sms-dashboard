@@ -13,16 +13,39 @@ const normalizeRange = (dates) => {
   return [start, end];
 };
 
-const CustomInput = React.forwardRef(({ value, onClick, placeholder, className }, ref) => (
-  <Button variant="outline-secondary" size="sm" className={className} onClick={onClick} ref={ref} type="button">
-    {value || placeholder}
-  </Button>
-));
+const formatDate = (date) => {
+  if (!date) return '';
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const CustomInput = React.forwardRef(
+  ({ value, onClick, placeholder, className, startDate, endDate }, ref) => {
+    const display = startDate || endDate
+      ? `${formatDate(startDate)}${endDate ? ` - ${formatDate(endDate)}` : ''}`
+      : value;
+
+    return (
+      <Button
+        variant="outline-secondary"
+        size="sm"
+        className={className}
+        onClick={onClick}
+        ref={ref}
+        type="button"
+      >
+        {display || placeholder}
+      </Button>
+    );
+  }
+);
 
 const TableDateRangeFilter = ({
   value,
   onChange,
-  placeholder = 'Date Range',
+  placeholder = 'YYYY-MM-DD - YYYY-MM-DD',
   className,
   dateFormat = 'yyyy-MM-dd',
   ...rest
@@ -37,7 +60,14 @@ const TableDateRangeFilter = ({
       endDate={endDate}
       selectsRange
       dateFormat={dateFormat}
-      customInput={<CustomInput className={className} placeholder={placeholder} />}
+      customInput={
+        <CustomInput
+          className={className}
+          placeholder={placeholder}
+          startDate={startDate}
+          endDate={endDate}
+        />
+      }
       placeholderText={placeholder}
       {...rest}
     />

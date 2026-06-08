@@ -12,7 +12,30 @@ import ReactEchart from 'components/common/ReactEchart';
 
 echarts.use([LineChart, TooltipComponent, GridComponent, LegendComponent]);
 
-const getOption = (getThemeColor, data, paymentStatus, isDark) => ({
+const defaultHourLabels = [
+  '9:00 AM',
+  '10:00 AM',
+  '11:00 AM',
+  '12:00 PM',
+  '1:00 PM',
+  '2:00 PM',
+  '3:00 PM',
+  '4:00 PM',
+  '5:00 PM',
+  '6:00 PM',
+  '7:00 PM',
+  '8:00 PM'
+];
+
+const getOption = (getThemeColor, data, paymentStatus, isDark) => {
+  const labels =
+    data?.labels && Array.isArray(data.labels) && data.labels.length
+      ? data.labels
+      : defaultHourLabels;
+  const seriesData = (data?.[paymentStatus] || []).map(item =>
+    typeof item === 'number' ? item : Number(item) || 0
+  );
+  return {
   tooltip: {
     trigger: 'axis',
     axisPointer: {
@@ -28,24 +51,11 @@ const getOption = (getThemeColor, data, paymentStatus, isDark) => ({
       fontSize: 12,
       color: getThemeColor('gray-1100')
     },
-    formatter: params => `${params[0].axisValue} - ${params[0].value} USD`
+    formatter: params => `${params[0].axisValue} — ${params[0].value} SMS`
   },
   xAxis: {
     type: 'category',
-    data: [
-      '9:00 AM',
-      '10:00 AM',
-      '11:00 AM',
-      '12:00 PM',
-      '1:00 PM',
-      '2:00 PM',
-      '3:00 PM',
-      '4:00 PM',
-      '5:00 PM',
-      '6:00 PM',
-      '7:00 PM',
-      '8:00 PM'
-    ],
+    data: labels,
     boundaryGap: false,
     splitLine: {
       show: true,
@@ -72,7 +82,8 @@ const getOption = (getThemeColor, data, paymentStatus, isDark) => ({
       fontSize: 12,
       margin: 15,
       // interval: window.innerWidth < 768 ? 'auto' : 0,
-      formatter: value => value.substring(0, value.length - 3)
+      formatter: value =>
+        value && value.length > 3 ? value.substring(0, value.length - 3) : value
     }
   },
   yAxis: {
@@ -93,7 +104,7 @@ const getOption = (getThemeColor, data, paymentStatus, isDark) => ({
     {
       type: 'line',
       smooth: true,
-      data: data[paymentStatus].map(item => (item * 3.24).toFixed(2)),
+      data: seriesData,
       symbol: 'emptyCircle',
       itemStyle: {
         color: isDark ? getThemeColor('primary') : getThemeColor('white')
@@ -134,7 +145,8 @@ const getOption = (getThemeColor, data, paymentStatus, isDark) => ({
     }
   ],
   grid: { right: 15, left: 15, bottom: '15%', top: 0 }
-});
+  };
+};
 
 const LinePaymentChart = ({ data, paymentStatus, style, ref }) => {
   const {

@@ -24,7 +24,7 @@ const AllTicketsHeader = ({ layout, handleShow }) => {
         </Col>
       </Row>
       <div className="border-bottom border-200 my-3"></div>
-      <div className="d-flex align-items-center justify-content-between justify-content-lg-end px-x1">
+      <div className="d-flex align-items-center justify-content-between justify-content-lg-end gap-2 px-x1">
         <IconButton
           variant="falcon-default"
           size="sm"

@@ -71,10 +71,6 @@ const NavbarVertical = () => {
       })}
       variant="light"
     >
-      <Flex alignItems="center">
-        <ToggleButton />
-        <Logo at="navbar-vertical" textClass="text-primary" width={40} />
-      </Flex>
       <Navbar.Collapse
         in={showBurgerMenu}
         onMouseEnter={handleMouseEnter}
@@ -86,13 +82,13 @@ const NavbarVertical = () => {
               : 'none'
         }}
       >
-        <div className="navbar-vertical-content scrollbar">
+        <div className="navbar-vertical-content scrollbar" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+          <Flex alignItems="center" className="w-100 py-3 px-3">
+            <Logo at="navbar-top" textClass="text-white" width={42} id="topLogo" />
+          </Flex>
           <Nav className="flex-column" as="ul">
             {routes.map(route => (
               <Fragment key={route.label}>
-                {!route.labelDisable && (
-                  <NavbarLabel label={capitalize(route.label)} />
-                )}
                 <NavbarVerticalMenu routes={route.children} />
               </Fragment>
             ))}

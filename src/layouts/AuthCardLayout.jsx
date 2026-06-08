@@ -8,8 +8,14 @@ import Section from 'components/common/Section';
 import bgShape from 'assets/img/illustrations/bg-shape.png';
 import shape1 from 'assets/img/illustrations/shape-1.png';
 import halfCircle from 'assets/img/illustrations/half-circle.png';
+import { useAppContext } from 'providers/AppProvider';
 
 const AuthCardLayout = ({ leftSideContent, children, footer = true }) => {
+  const { branding } = useAppContext();
+  const companyName = branding?.name || 'SMS Pro';
+  const footerText =
+    branding?.loginFooter || `${companyName} © ${new Date().getFullYear()}. All rights reserved.`;
+
   return (
     <Section fluid className="py-0">
       <Row className="g-0 min-vh-100 flex-center">
@@ -43,13 +49,9 @@ const AuthCardLayout = ({ leftSideContent, children, footer = true }) => {
                         className="link-light mb-4 font-sans-serif fw-bolder fs-5 d-inline-block"
                         to="/"
                       >
-                        falcon
+                        {companyName}
                       </Link>
-                      <p className="opacity-75 text-white">
-                        With the power of Falcon, you can now focus only on
-                        functionaries for your digital products, while leaving
-                        the UI design on us!
-                      </p>
+                      <p className="opacity-75 text-white">{footerText}</p>
                     </div>
                   </div>
                   <div
@@ -60,20 +62,7 @@ const AuthCardLayout = ({ leftSideContent, children, footer = true }) => {
 
                     {footer && (
                       <p className="mb-0 mt-4 mt-md-5 fs-10 fw-semibold text-white opacity-75">
-                        Read our{' '}
-                        <Link
-                          className="text-decoration-underline text-white"
-                          to="#!"
-                        >
-                          terms
-                        </Link>{' '}
-                        and{' '}
-                        <Link
-                          className="text-decoration-underline text-white"
-                          to="#!"
-                        >
-                          conditions{' '}
-                        </Link>
+                        {footerText}
                       </p>
                     )}
                   </div>

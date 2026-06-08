@@ -11,8 +11,13 @@ const BillingProfileFormModal = ({ show, onClose, onSubmit, record }) => {
 
   const paymentOptions = [
     { id: 'Bank Transfer', name: 'Bank Transfer' },
-    { id: 'Card', name: 'Card' },
+    { id: 'Cash', name: 'Cash' },
     { id: 'Wallet', name: 'Wallet' }
+  ];
+
+  const billingCycleOptions = [
+    { id: 'Weekly', name: 'Weekly' },
+    { id: 'Monthly', name: 'Monthly' }
   ];
 
   const initialValues = useMemo(
@@ -21,6 +26,7 @@ const BillingProfileFormModal = ({ show, onClose, onSubmit, record }) => {
       billingEmail: record?.billingEmail ?? '',
       billingAddress: record?.billingAddress ?? '',
       currency: record?.currency ?? 'USD',
+      billingCycle: record?.billingCyclePref ?? record?.billingCycle ?? 'Monthly',
       taxId: record?.taxId ?? '',
       paymentMethod: record?.paymentMethod ?? 'Bank Transfer'
     }),
@@ -33,9 +39,8 @@ const BillingProfileFormModal = ({ show, onClose, onSubmit, record }) => {
     if (show) setValues(initialValues);
   }, [show, initialValues, setValues]);
 
-  const handleSubmit = () => {
-    onSubmit?.(values);
-    onClose?.();
+  const handleSubmit = async () => {
+    await onSubmit?.(values);
   };
 
   return (
@@ -84,6 +89,14 @@ const BillingProfileFormModal = ({ show, onClose, onSubmit, record }) => {
           options={currencyOptions}
           onChange={(value) => setValues((prev) => ({ ...prev, currency: value }))}
           placeholder="Select currency"
+        />
+        <UseSelect
+          name="billingCycle"
+          label="Billing Cycle"
+          value={values.billingCycle}
+          options={billingCycleOptions}
+          onChange={(value) => setValues((prev) => ({ ...prev, billingCycle: value }))}
+          placeholder="Select cycle"
         />
         <UseInput
           name="taxId"

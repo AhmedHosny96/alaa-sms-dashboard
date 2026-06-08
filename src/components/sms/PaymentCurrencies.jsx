@@ -1,41 +1,83 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Button, Col, Form, Row } from 'react-bootstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { UseTable, Search, TableExportSelect, UseModal, useForm, Forms, UseInput, UseSelect } from 'components/common/UseTable';
+import { Col, Form, Row } from 'react-bootstrap';
+import TableSearchInput from 'components/common/TableSearchInput';
+import { UseTable, UseModal, useForm, Forms, UseInput, UseSelect, TableExportSelect } from 'components/common/UseTable';
 import TablePageLayout from 'components/common/TablePageLayout';
+import IconButton from 'components/common/IconButton';
+
+const INITIAL_CURRENCIES = [
+  {
+    id: 1,
+    code: 'USD',
+    name: 'US Dollar',
+    symbol: '$',
+    rate: 1,
+    status: 'active',
+    isDefault: true,
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: 2,
+    code: 'EUR',
+    name: 'Euro',
+    symbol: '€',
+    rate: 0.92,
+    status: 'active',
+    isDefault: false,
+    updatedAt: new Date().toISOString()
+  }
+];
 
 const CURRENCY_COLUMNS = (onEdit, onDelete) => [
   { title: 'Code', dataIndex: 'code', key: 'code' },
   { title: 'Name', dataIndex: 'name', key: 'name' },
   { title: 'Symbol', dataIndex: 'symbol', key: 'symbol', align: 'center' },
   { title: 'Rate', dataIndex: 'rate', key: 'rate', align: 'right' },
-  { title: 'Status', dataIndex: 'status', key: 'status', align: 'center' },
-  { title: 'Updated', dataIndex: 'updatedAt', key: 'updatedAt' },
+  {
+    title: 'Status',
+    dataIndex: 'status',
+    key: 'status',
+    align: 'center',
+    render: (_, record) => String(record.status || '').toUpperCase()
+  },
+  {
+    title: 'Default',
+    key: 'isDefault',
+    align: 'center',
+    render: (_, record) => (record.isDefault ? 'Yes' : 'No')
+  },
+  {
+    title: 'Updated',
+    dataIndex: 'updatedAt',
+    key: 'updatedAt',
+    render: (_, record) =>
+      record.updatedAt ? new Date(record.updatedAt).toLocaleString() : '—'
+  },
   {
     title: 'Action',
     key: 'action',
     align: 'center',
     width: 120,
     render: (_, record) => (
-      <div className="d-flex justify-content-center gap-1">
-        <Button
-          variant="warning"
+      <div className="d-inline-flex align-items-center">
+        <IconButton
+          variant="falcon-default"
           size="sm"
-          className="p-0 px-2"
-          onClick={() => onEdit(record)}
+          icon="edit"
+          transform="shrink-3"
+          className="me-2 text-primary shadow-none"
           title="Edit"
-        >
-          <FontAwesomeIcon icon="edit" />
-        </Button>
-        <Button
-          variant="danger"
+          onClick={() => onEdit(record)}
+        />
+        <IconButton
+          variant="falcon-default"
           size="sm"
-          className="p-0 px-2"
-          onClick={() => onDelete(record)}
+          icon="trash"
+          transform="shrink-3"
+          className="text-danger shadow-none"
           title="Delete"
-        >
-          <FontAwesomeIcon icon="trash-alt" />
-        </Button>
+          onClick={() => onDelete(record)}
+        />
       </div>
     )
   }
@@ -47,11 +89,22 @@ const statusOptions = [
 ];
 
 const PaymentCurrencies = () => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState(INITIAL_CURRENCIES);
   const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState('');
   const [modalShow, setModalShow] = useState(false);
   const [recordForEdit, setRecordForEdit] = useState(null);
+
+  const filteredData = useMemo(() => {
+    const list = Array.isArray(data) ? data : [];
+    if (!query) return list;
+    const q = query.toLowerCase();
+    return list.filter((row) =>
+      [row.code, row.name, row.symbol, row.status]
+        .filter(Boolean)
+        .some((v) => String(v).toLowerCase().includes(q))
+    );
+  }, [data, query]);
 
   const columns = useMemo(
     () =>
@@ -60,12 +113,14 @@ const PaymentCurrencies = () => {
           setRecordForEdit(record);
           setModalShow(true);
         },
-        () => {}
+        (record) => {
+          setData((prev) => prev.filter((item) => item.id !== record.id));
+        }
       ),
-    []
+    [setData]
   );
 
-  const { TableContainer } = UseTable(columns, data, loading);
+  const { TableContainer } = UseTable(columns, filteredData, loading);
 
   const initialValues = useMemo(
     () => ({
@@ -73,7 +128,8 @@ const PaymentCurrencies = () => {
       name: recordForEdit?.name ?? '',
       symbol: recordForEdit?.symbol ?? '',
       rate: recordForEdit?.rate ?? '',
-      status: recordForEdit?.status ?? 'active'
+      status: recordForEdit?.status ?? 'active',
+      isDefault: Boolean(recordForEdit?.isDefault)
     }),
     [recordForEdit]
   );
@@ -88,6 +144,11 @@ const PaymentCurrencies = () => {
     setValues((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleCheckboxChange = (event) => {
+    const { name, checked } = event.target;
+    setValues((prev) => ({ ...prev, [name]: checked }));
+  };
+
   const handleAddCurrency = () => {
     setRecordForEdit(null);
     reset();
@@ -100,6 +161,35 @@ const PaymentCurrencies = () => {
   };
 
   const handleSubmit = () => {
+    const payload = {
+      id: recordForEdit?.id ?? Date.now(),
+      code: String(values.code || '').trim().toUpperCase(),
+      name: String(values.name || '').trim(),
+      symbol: String(values.symbol || '').trim(),
+      rate: Number(values.rate || 0),
+      status: values.status || 'active',
+      isDefault: Boolean(values.isDefault),
+      updatedAt: new Date().toISOString()
+    };
+
+    if (!payload.code || !payload.name) return;
+
+    setData((prev) => {
+      let next = Array.isArray(prev) ? [...prev] : [];
+      if (payload.isDefault) {
+        next = next.map((item) => ({ ...item, isDefault: false }));
+      }
+
+      const editIndex = next.findIndex((item) => item.id === payload.id);
+      if (editIndex >= 0) {
+        next[editIndex] = payload;
+      } else {
+        next.unshift(payload);
+      }
+
+      return next;
+    });
+
     handleCloseModal();
   };
 
@@ -107,33 +197,41 @@ const PaymentCurrencies = () => {
     <>
       <TablePageLayout
         title="System Currencies"
-        subtitle="Manage available currencies for payments."
+       // subtitle="Manage available currencies for payments."
         toolbar={
           <>
-            <div className="d-flex gap-2 flex-wrap align-items-center">
-              <Button variant="primary" size="sm" className="table-page-addButton" onClick={handleAddCurrency}>
-                <FontAwesomeIcon icon="plus" className="me-1" />
-                Add Currency
-              </Button>
-              <TableExportSelect
-                onExport={(type) => {
-                  if (type === 'print') window.print();
-                }}
-              />
-            </div>
-            <Search
+            <IconButton
+              variant="primary"
+              size="sm"
+              icon="plus"
+              transform="shrink-3"
+              title="New"
+              onClick={handleAddCurrency}
+            >
+              <span className="d-none d-sm-inline-block ms-1">New</span>
+            </IconButton>
+            <TableExportSelect
+              icon="external-link-alt"
+              variant="falcon-default"
+              className="mx-2"
+              onExport={(type) => {
+                if (type === 'print') window.print();
+              }}
+            />
+            <TableSearchInput
+              className="table-page-filter"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={setQuery}
               placeholder="search ..."
-              className="table-page-search"
             />
           </>
         }
       >
         <TableContainer
-          dataSource={data}
+          dataSource={filteredData}
           loading={loading}
           rowKey={(r) => r.id ?? r.code}
+          className="table-sm fs-10 mb-0 overflow-hidden"
         />
       </TablePageLayout>
 
@@ -143,12 +241,12 @@ const PaymentCurrencies = () => {
         setIsVisible={setModalShow}
         onCancel={handleCloseModal}
         footer={[
-          <Button key="close" variant="secondary" size="sm" onClick={handleCloseModal}>
+          <IconButton key="close" variant="falcon-default" size="sm" onClick={handleCloseModal}>
             Close
-          </Button>,
-          <Button key="submit" variant="primary" size="sm" type="submit" form="currency-form">
+          </IconButton>,
+          <IconButton key="submit" variant="primary" size="sm" type="submit" form="currency-form">
             {recordForEdit ? 'Update' : 'Create'}
-          </Button>
+          </IconButton>
         ]}
       >
         <Forms id="currency-form" onFinish={handleSubmit}>
@@ -203,7 +301,13 @@ const PaymentCurrencies = () => {
             <Col md={6}>
               <Form.Group className="mb-2">
                 <Form.Label>Default</Form.Label>
-                <Form.Check type="checkbox" name="isDefault" label="Set as default" />
+                <Form.Check
+                  type="checkbox"
+                  name="isDefault"
+                  label="Set as default"
+                  checked={Boolean(values.isDefault)}
+                  onChange={handleCheckboxChange}
+                />
               </Form.Group>
             </Col>
           </Row>

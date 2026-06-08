@@ -22,7 +22,7 @@ const TableGroupBySelect = ({ onSelect, size = 'sm', className, ...rest }) => {
   return (
     <Dropdown>
       <Dropdown.Toggle
-        variant="outline-secondary"
+        variant="falcon-default"
         size={size}
         className={className}
         aria-label="Group by"
@@ -30,7 +30,11 @@ const TableGroupBySelect = ({ onSelect, size = 'sm', className, ...rest }) => {
       >
         Group By
       </Dropdown.Toggle>
-      <Dropdown.Menu className="shadow-sm">
+      <Dropdown.Menu
+        className="shadow-sm"
+        renderOnMount
+        popperConfig={{ strategy: 'fixed' }}
+      >
         {GROUP_BY_OPTIONS.map((opt) => (
           <Dropdown.Item key={opt.value} onClick={() => handleSelect(opt.value)}>
             <FontAwesomeIcon icon={opt.icon} className="me-2 text-700" />

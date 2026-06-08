@@ -1,77 +1,123 @@
-import React from 'react';
-import { Card, Col, Container, Row, Table, Form, Button } from 'react-bootstrap';
+import React, { useMemo, useState } from 'react';
+import { Form } from 'react-bootstrap';
+import TableSearchInput from 'components/common/TableSearchInput';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import IconButton from 'components/common/IconButton';
+import TablePageLayout from 'components/common/TablePageLayout';
+import { useTable, TableSelectFilter, TableExportSelect } from 'components/common/UseTable';
 
-const MtEdr = () => (
-  <Container fluid className="py-3">
-    <Row className="mb-3">
-      <Col>
-        <h2 className="mb-0">SMS MT EDR (Event Detail Records)</h2>
-        <p className="text-700 mb-0">
-          Mobile Terminated event detail records for SMS traffic.
-        </p>
-      </Col>
-    </Row>
-    <Row className="mb-3">
-      <Col>
-        <Card>
-          <Card.Body>
-            <Form>
-              <Row className="g-2">
-                <Col md={3}>
-                  <Form.Control type="date" />
-                </Col>
-                <Col md={3}>
-                  <Form.Control type="text" placeholder="Search number" />
-                </Col>
-                <Col md={3}>
-                  <Form.Select>
-                    <option>All Status</option>
-                    <option>Success</option>
-                    <option>Failed</option>
-                  </Form.Select>
-                </Col>
-                <Col md={3}>
-                  <Button variant="primary" className="w-100">Search</Button>
-                </Col>
-              </Row>
-            </Form>
-          </Card.Body>
-        </Card>
-      </Col>
-    </Row>
-    <Row>
-      <Col>
-        <Card>
-          <Card.Header className="d-flex justify-content-between align-items-center">
-            <h5 className="mb-0">MT EDR Records</h5>
-            <Button variant="outline-primary" size="sm">Export</Button>
-          </Card.Header>
-          <Card.Body className="p-0">
-            <Table className="table-sm fs--1 mb-0 overflow-hidden">
-              <thead className="bg-200 text-900">
-                <tr>
-                  <th className="text-nowrap">Timestamp</th>
-                  <th className="text-nowrap">Event ID</th>
-                  <th className="text-nowrap">MSISDN</th>
-                  <th className="text-nowrap">Message ID</th>
-                  <th className="text-nowrap">Provider</th>
-                  <th className="text-nowrap">Status</th>
-                  <th className="text-nowrap">Details</th>
-                </tr>
-              </thead>
-              <tbody className="list">
-                <tr>
-                  <td colSpan={7} className="text-center text-700 py-5">
-                    No MT EDR records available.
-                  </td>
-                </tr>
-              </tbody>
-            </Table>
-          </Card.Body>
-        </Card>
-      </Col>
-    </Row>
-  </Container>
-);
+const MT_EDR_COLUMNS = () => [
+  { title: 'Timestamp', dataIndex: 'timestamp', key: 'timestamp' },
+  { title: 'Message ID', dataIndex: 'messageId', key: 'messageId' },
+  { title: 'From', dataIndex: 'from', key: 'from' },
+  { title: 'To', dataIndex: 'to', key: 'to' },
+  { title: 'Direction', dataIndex: 'direction', key: 'direction' },
+  { title: 'Status', dataIndex: 'status', key: 'status' },
+  { title: 'Error', dataIndex: 'error', key: 'error' },
+  { title: 'Failure Cause', dataIndex: 'failureCause', key: 'failureCause' },
+  { title: 'Provider', dataIndex: 'provider', key: 'provider' },
+  { title: 'Client', dataIndex: 'client', key: 'client' },
+  { title: 'Message', dataIndex: 'message', key: 'message' },
+  { title: 'Segments', dataIndex: 'segments', key: 'segments', align: 'right' },
+  { title: 'Cost', dataIndex: 'cost', key: 'cost', align: 'right' }
+];
+
+const MtEdr = () => {
+  const [data] = useState([]);
+  const [loading] = useState(false);
+  const [query, setQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+
+  const statusOptions = [
+    { value: 'Success', label: 'Success' },
+    { value: 'Failed', label: 'Failed' },
+    { value: 'Unknown', label: 'Unknown' }
+  ];
+
+  const columns = useMemo(() => MT_EDR_COLUMNS(), []);
+  const { TableContainer } = useTable(columns, data, loading, {
+    pageSizePreset: 'large',
+    defaultPageSize: 500
+  });
+
+  const filteredData = useMemo(() => {
+    let list = Array.isArray(data) ? [...data] : [];
+    if (filterStatus) list = list.filter((row) => String(row.status) === String(filterStatus));
+    if (query) {
+      const q = query.toLowerCase();
+      list = list.filter((row) =>
+        [
+          row.timestamp,
+          row.messageId,
+          row.from,
+          row.to,
+          row.provider,
+          row.client,
+          row.status,
+          row.error
+        ]
+          .filter(Boolean)
+          .some((val) => String(val).toLowerCase().includes(q))
+      );
+    }
+    return list;
+  }, [data, filterStatus, query]);
+
+  return (
+    <TablePageLayout
+      title="SMS MT EDR"
+     // subtitle="All traffic details, including errors, failures, message IDs, and message-specific information."
+      toolbar={
+        <>
+          <IconButton
+            variant="primary"
+            size="sm"
+            icon="plus"
+            transform="shrink-3"
+            title="New"
+          >
+            <span className="d-none d-sm-inline-block ms-1">New</span>
+          </IconButton>
+          <TableExportSelect
+            icon="external-link-alt"
+            variant="falcon-default"
+            className="mx-2"
+            onExport={(type) => {
+              if (type === 'print') window.print();
+            }}
+          />
+          <Form className="d-flex align-items-center flex-wrap ms-2">
+            <Form.Control size="sm" type="date" className="me-2" />
+            <Form.Control
+              size="sm"
+              type="text"
+              placeholder="Search number or message ID"
+              className="me-2"
+            />
+            <TableSelectFilter
+              value={filterStatus}
+              placeholder="All Status"
+              onChange={(value) => setFilterStatus(value)}
+              options={statusOptions}
+              className="me-2"
+            />
+            <TableSearchInput
+              className="table-page-filter"
+              value={query}
+              onChange={setQuery}
+              placeholder="search ..."
+            />
+          </Form>
+        </>
+      }
+    >
+      <TableContainer
+        className="table-sm fs-10 mb-0 overflow-hidden"
+        dataSource={filteredData}
+        rowKey={(row) => row.id ?? row.messageId ?? row.timestamp}
+      />
+    </TablePageLayout>
+  );
+};
 
 export default MtEdr;

@@ -6,18 +6,18 @@ import IconButton from 'components/common/IconButton';
 const moreItems = [
   {
     id: 1,
-    label: 'Unlimited downloads',
+    label: 'High-throughput SMS routing',
     icon: 'infinity'
   },
   {
     id: 2,
-    label: 'Commercial use',
+    label: 'Priority delivery channels',
     icon: 'check'
   },
-  { id: 3, label: '100% moneyback guarantee', icon: 'check' },
+  { id: 3, label: 'Dedicated sender management', icon: 'check' },
   {
     id: 4,
-    label: 'Lifetime free updates',
+    label: 'Advanced SMS analytics',
     icon: 'check'
   }
 ];
@@ -26,17 +26,14 @@ const DoMoreCard = ({ ...rest }) => {
   return (
     <Card {...rest}>
       <Card.Body className="p-4">
-        <h4 className="text-800">More with Falcon</h4>
+        <h4 className="text-800">SMS Plan Overview</h4>
         <h5 className="text-600 fs-9">
-          Get <span className="text-primary fw-semibold">70% OFF </span> with
-          Falcon+
+          Increase capacity with <span className="text-primary fw-semibold">Pro SMS</span>
         </h5>
         <Alert variant="success" className="mt-3">
           <h3 className="mb-0 text-800">
             $29
-            <span className="fs-9 fw-medium font-sans-serif text-600">
-              /month
-            </span>
+            <span className="fs-9 fw-medium font-sans-serif text-600">/month</span>
           </h3>
         </Alert>
         <ul className="fa-ul ms-2 ps-x1 mb-2">
@@ -58,7 +55,7 @@ const DoMoreCard = ({ ...rest }) => {
           iconClassName="me-2"
           className="w-100"
         >
-          Upgrade to Falcon+
+          Upgrade SMS Plan
         </IconButton>
       </Card.Body>
     </Card>

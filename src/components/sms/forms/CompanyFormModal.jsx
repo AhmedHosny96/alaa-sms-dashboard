@@ -1,10 +1,15 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { Button, Form } from 'react-bootstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { UseModal, useForm, Forms, UseInput, UseSelect } from 'components/common/UseTable';
 import { isValidIPv4ClassABC } from 'helpers/utils';
+import IconButton from 'components/common/IconButton';
+import countries from 'data/countries';
+import subscriptionService from 'services/subscriptionService';
+import ipService from 'services/ipService';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { toast } from 'react-toastify';
 
-const CompanyFormModal = ({ show, onClose, onSubmit, record }) => {
+const CompanyFormModal = ({ show, onClose, onSubmit, record, submitting = false }) => {
   const statusOptions = [
     { id: 'Active', name: 'Active' },
     { id: 'Suspended', name: 'Suspended' }
@@ -16,30 +21,66 @@ const CompanyFormModal = ({ show, onClose, onSubmit, record }) => {
     { id: 'GBP', name: 'GBP' }
   ];
 
-  const planOptions = [
-    { id: 'Starter', name: 'Starter', tps: 20 },
-    { id: 'Growth', name: 'Growth', tps: 30 },
-    { id: 'Enterprise', name: 'Enterprise', tps: 100 }
-  ];
+  const countryOptions = countries.map((name) => ({ id: name, name }));
+
+  const [planOptions, setPlanOptions] = useState([]);
+  const [ipOptions, setIpOptions] = useState([]);
+  const fetchPlans = useCallback(async () => {
+    try {
+      const result = await subscriptionService.listActive();
+      const list = Array.isArray(result?.content) ? result.content : Array.isArray(result) ? result : [];
+      setPlanOptions(list);
+    } catch {
+      setPlanOptions([]);
+    }
+  }, []);
+  const fetchAvailableIps = useCallback(async () => {
+    try {
+      const result = await ipService.listAvailable();
+      const list = Array.isArray(result) ? result : [];
+      if (record?.smppIp && !list.some((ip) => ip.id === record.smppIp.id)) {
+        list.unshift(record.smppIp);
+      }
+      setIpOptions(list);
+    } catch {
+      setIpOptions([]);
+    }
+  }, [record]);
+  useEffect(() => {
+    if (show) {
+      fetchPlans();
+      fetchAvailableIps();
+    }
+  }, [show, fetchPlans, fetchAvailableIps]);
 
   const initialValues = useMemo(
     () => ({
       name: record?.name ?? '',
       domain: record?.domain ?? '',
       contactEmail: record?.contactEmail ?? '',
+      phoneNumber: record?.phoneNumber ?? '',
+      country: record?.country ?? '',
+      username: record?.username ?? '',
+      password: record?.password ?? '',
+      apiKey: record?.apiKey ?? '',
+      logoUrl: record?.logoUrl ?? '',
+      loginBackgroundUrl: record?.loginBackgroundUrl ?? '',
+      loginFooter: record?.loginFooter ?? '',
       currency: record?.currency ?? 'USD',
-      subscriptionPlan: record?.subscriptionPlan ?? 'Starter',
+      subscriptionPlanId: record?.subscriptionPlanId ?? null,
+      subscriptionPlan: record?.subscriptionPlan ?? '',
       tpsLimit: record?.tpsLimit ?? '',
       ipWhitelist: record?.ipWhitelist ?? '',
-      status: record?.status ?? 'Active'
+      status: record?.status ?? 'Active',
+      smppIpAddressId: record?.smppIp?.id ?? null
     }),
     [record]
   );
 
   const { values, setValues, handleOnChange } = useForm(initialValues);
   const selectedPlan = useMemo(
-    () => planOptions.find((plan) => plan.id === values.subscriptionPlan) ?? planOptions[0],
-    [planOptions, values.subscriptionPlan]
+    () => planOptions.find((plan) => plan.id === values.subscriptionPlanId) ?? null,
+    [planOptions, values.subscriptionPlanId]
   );
   const [companyIpList, setCompanyIpList] = useState([]);
   const [companyIpInput, setCompanyIpInput] = useState('');
@@ -48,6 +89,7 @@ const CompanyFormModal = ({ show, onClose, onSubmit, record }) => {
   useEffect(() => {
     if (show) setValues(initialValues);
   }, [show, initialValues, setValues]);
+
 
   useEffect(() => {
     if (!show) return;
@@ -79,10 +121,26 @@ const CompanyFormModal = ({ show, onClose, onSubmit, record }) => {
     setCompanyIpList((prev) => prev.filter((x) => x !== ip));
   };
 
+  const generateApiKey = () =>
+    `api_${Math.random().toString(36).slice(2)}${Math.random().toString(36).slice(2)}`;
+
+  useEffect(() => {
+    if (!show) return;
+    if (!values.apiKey) {
+      setValues((prev) => ({ ...prev, apiKey: generateApiKey() }));
+    }
+  }, [show, values.apiKey, setValues]);
+
+
   const handleSubmit = () => {
-    const payload = { ...values, ipWhitelist: companyIpList.join('\n') };
-    onSubmit?.(payload);
-    onClose?.();
+    const trimmed = {
+      ...values,
+      username: values.username?.slice(0, 16) ?? '',
+      password: values.password?.slice(0, 8) ?? '',
+      ipWhitelist: companyIpList.join('\n'),
+      smppIpAddressId: values.smppIpAddressId || null
+    };
+    onSubmit?.(trimmed);
   };
 
   return (
@@ -90,17 +148,38 @@ const CompanyFormModal = ({ show, onClose, onSubmit, record }) => {
       title={record ? 'Edit Company' : 'Create Company'}
       isVisible={show}
       setIsVisible={() => {}}
-      onCancel={onClose}
+      onCancel={submitting ? undefined : onClose}
       size="lg"
       footer={[
-        <Button key="cancel" variant="secondary" size="sm" onClick={onClose}>
+        <IconButton key="cancel" variant="falcon-default" size="sm" onClick={onClose} disabled={submitting}>
           Cancel
-        </Button>,
-        <Button key="submit" variant="primary" size="sm" type="submit" form="company-form">
-          {record ? 'Update' : 'Create'}
-        </Button>
+        </IconButton>,
+        <IconButton key="submit" variant="primary" size="sm" type="submit" form="company-form" disabled={submitting}>
+          {submitting ? (
+            <>
+              <span className="me-2">Saving...</span>
+              <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            </>
+          ) : record ? 'Update' : 'Create'}
+        </IconButton>
       ]}
     >
+      {submitting && (
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: 'rgba(255,255,255,0.6)',
+          zIndex: 10,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <span className="spinner-border text-primary" style={{ width: 48, height: 48 }} role="status" aria-hidden="true"></span>
+        </div>
+      )}
       <Forms id="company-form" onFinish={handleSubmit}>
         <UseInput
           name="name"
@@ -124,6 +203,77 @@ const CompanyFormModal = ({ show, onClose, onSubmit, record }) => {
           onChange={handleOnChange}
           placeholder="admin@acme.com"
         />
+        <UseInput
+          name="phoneNumber"
+          label="Contact Phone"
+          value={values.phoneNumber}
+          onChange={handleOnChange}
+          placeholder="+1 555 000 0000"
+        />
+        <UseSelect
+          name="country"
+          label="Country"
+          value={values.country}
+          options={countryOptions}
+          onChange={(value) => setValues((prev) => ({ ...prev, country: value }))}
+          placeholder="Select country"
+          showSearch={true}
+        />
+        <UseInput
+          name="username"
+          label="Username"
+          value={values.username}
+          onChange={handleOnChange}
+          placeholder="Username"
+          maxLength={16}
+        />
+        <UseInput
+          name="password"
+          label={record ? 'Password (leave blank to keep current)' : 'Password'}
+          type="password"
+          value={values.password}
+          onChange={handleOnChange}
+          placeholder="Password"
+          maxLength={255}
+          required={!record}
+        />
+        <UseInput
+          name="apiKey"
+          label="API Key"
+          value={values.apiKey}
+          onChange={handleOnChange}
+          placeholder="API Key"
+          readOnly
+        />
+        <Button
+          variant="outline-primary"
+          size="sm"
+          className="mt-2"
+          onClick={() => setValues((prev) => ({ ...prev, apiKey: generateApiKey() }))}
+        >
+          Generate API Key
+        </Button>
+        <UseInput
+          name="logoUrl"
+          label="Company Logo URL"
+          value={values.logoUrl}
+          onChange={handleOnChange}
+          placeholder="https://company.com/logo.png"
+        />
+        <UseInput
+          name="loginBackgroundUrl"
+          label="Login Background Image URL"
+          value={values.loginBackgroundUrl}
+          onChange={handleOnChange}
+          placeholder="https://company.com/login-bg.jpg"
+        />
+        {/* <UseInput
+          name="loginFooter"
+          label="Login Footer Text"
+          value={values.loginFooter}
+          onChange={handleOnChange}
+          placeholder="Company © 2026. All rights reserved."
+        /> */}
         <UseSelect
           name="currency"
           label="Billing Currency"
@@ -133,28 +283,43 @@ const CompanyFormModal = ({ show, onClose, onSubmit, record }) => {
           placeholder="Select currency"
         />
         <UseSelect
-          name="subscriptionPlan"
+          name="subscriptionPlanId"
           label="Subscription Plan"
-          value={values.subscriptionPlan}
-          options={planOptions.map((plan) => ({ id: plan.id, name: `${plan.name} (${plan.tps} TPS)` }))}
+          value={values.subscriptionPlanId}
+          options={planOptions.map((plan) => ({
+            id: plan.id,
+            name: `${plan.name}${plan.tpsLimit != null ? ` (${plan.tpsLimit} TPS)` : ''}`
+          }))}
           onChange={(value) =>
             setValues((prev) => ({
               ...prev,
-              subscriptionPlan: value,
-              tpsLimit: planOptions.find((plan) => plan.id === value)?.tps ?? prev.tpsLimit
+              subscriptionPlanId: value || null,
+              tpsLimit: planOptions.find((plan) => plan.id === value)?.tpsLimit ?? prev.tpsLimit
             }))
           }
           placeholder="Select plan"
         />
-        <UseInput
+        <UseSelect
+          name="smppIpAddressId"
+          label="SMPP IP (optional)"
+          value={values.smppIpAddressId}
+          options={ipOptions.map((ip) => ({
+            id: ip.id,
+            name: ip.port != null ? `${ip.ipAddress}:${ip.port}` : ip.ipAddress
+          }))}
+          onChange={(value) => setValues((prev) => ({ ...prev, smppIpAddressId: value || null }))}
+          placeholder="Select available IP"
+          showSearch={true}
+        />
+        {/* <UseInput
           name="tpsLimit"
           label="TPS Limit"
           type="number"
-          value={selectedPlan?.tps ?? values.tpsLimit}
+          value={selectedPlan?.tpsLimit ?? values.tpsLimit}
           onChange={handleOnChange}
           placeholder="50"
           readOnly
-        />
+        /> */}
         <Form.Group className="mb-2">
           <Form.Label>Dedicated IPs</Form.Label>
           <div

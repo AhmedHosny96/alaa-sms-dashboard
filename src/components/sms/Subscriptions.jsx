@@ -1,74 +1,156 @@
-import React, { useMemo, useState } from 'react';
-import { Button, Badge } from 'react-bootstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { UseTable, Search, TableExportSelect } from 'components/common/UseTable';
-import TablePageLayout from 'components/common/TablePageLayout';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import { Badge, Card, Col, Row, Spinner } from 'react-bootstrap';
+import TableSearchInput from 'components/common/TableSearchInput';
+import { TableExportSelect } from 'components/common/UseTable';
 import SubscriptionFormModal from 'components/sms/forms/SubscriptionFormModal';
+import IconButton from 'components/common/IconButton';
+import AdvanceTable from 'components/common/advance-table/AdvanceTable';
+import AdvanceTableFooter from 'components/common/advance-table/AdvanceTableFooter';
+import AdvanceTableProvider from 'providers/AdvanceTableProvider';
+import useAdvanceTable from 'hooks/useAdvanceTable';
+import subscriptionService from 'services/subscriptionService';
+import { toast } from 'react-toastify';
 
-const SUBSCRIPTION_COLUMNS = (onEdit) => [
-  { title: 'Plan Name', dataIndex: 'name', key: 'name' },
-  { title: 'Monthly Price', dataIndex: 'price', key: 'price', render: (v) => `$${v}/month` },
-  { title: 'TPS Limit', dataIndex: 'tps', key: 'tps' },
+const normalizeStatus = (status) => {
+  const raw = String(status || '').trim().toLowerCase();
+  if (raw === 'active') return 'Active';
+  if (raw === 'inactive') return 'Inactive';
+  return status || 'Active';
+};
+
+const normalizeSubscription = (item) => ({
+  ...item,
+  status: normalizeStatus(item?.status)
+});
+
+const toSubscriptionPayload = (payload) => ({
+  code: payload.code,
+  name: payload.name,
+  description: payload.description || null,
+  tpsLimit: payload.tpsLimit === '' || payload.tpsLimit == null ? null : Number(payload.tpsLimit),
+  priceMonthly: payload.priceMonthly === '' || payload.priceMonthly == null ? null : Number(payload.priceMonthly),
+  currency: payload.currency || 'USD',
+  billingCycle: payload.billingCycle || 'MONTHLY',
+  status: normalizeStatus(payload.status)
+});
+
+const SUBSCRIPTION_COLUMNS = (onEdit, onDelete) => [
+  { accessorKey: 'name', header: 'Plan Name', meta: { headerProps: { className: 'text-900' } } },
   {
-    title: 'Status',
-    dataIndex: 'status',
-    key: 'status',
-    render: (value) => (
-      <Badge bg={value === 'Active' ? 'success' : 'secondary'} className="text-uppercase">
-        {value || '—'}
+    accessorKey: 'priceMonthly',
+    header: 'Monthly Price',
+    meta: { headerProps: { className: 'text-900' } },
+    cell: ({ row: { original } }) =>
+      original.priceMonthly != null
+        ? `${original.currency || 'USD'} ${Number(original.priceMonthly).toFixed(2)}/month`
+        : '—'
+  },
+  {
+    accessorKey: 'tpsLimit',
+    header: 'TPS Limit',
+    meta: { headerProps: { className: 'text-900' } }
+  },
+  {
+    accessorKey: 'status',
+    header: 'Status',
+    meta: { headerProps: { className: 'text-900' } },
+    cell: ({ row: { original } }) => (
+      <Badge bg={original.status === 'Active' ? 'success' : 'secondary'} className="text-uppercase">
+        {original.status || '—'}
       </Badge>
     )
   },
-  { title: 'Created', dataIndex: 'createdAt', key: 'createdAt' },
   {
-    title: 'Action',
-    key: 'action',
-    align: 'center',
-    width: 90,
-    render: (_, record) => (
-      <div className="d-flex justify-content-center gap-1">
-        <Button
-          variant="warning"
+    accessorKey: 'createdAt',
+    header: 'Created',
+    meta: { headerProps: { className: 'text-900' } },
+    cell: ({ row: { original } }) =>
+      original.createdAt ? new Date(original.createdAt).toLocaleDateString() : '—'
+  },
+  {
+    accessorKey: 'actions',
+    header: 'Actions',
+    enableSorting: false,
+    meta: { headerProps: { className: 'text-900 text-end' }, cellProps: { className: 'text-end' } },
+    cell: ({ row: { original } }) => (
+      <div className="d-inline-flex align-items-center">
+        <IconButton
+          variant="falcon-default"
           size="sm"
-          className="px-2 py-0"
-          onClick={() => onEdit(record)}
+          icon="edit"
+          transform="shrink-3"
+          className="me-2 text-primary shadow-none"
           title="Edit"
-        >
-          <FontAwesomeIcon icon="edit" />
-        </Button>
+          onClick={() => onEdit(original)}
+        />
+        <IconButton
+          variant="falcon-default"
+          size="sm"
+          icon="trash"
+          transform="shrink-3"
+          className="text-danger shadow-none"
+          title="Delete"
+          onClick={() => onDelete(original)}
+        />
       </div>
     )
   }
 ];
 
 const Subscriptions = () => {
-  const [data] = useState([
-    { id: 1, name: 'Starter', price: 200, tps: 20,  createdAt: '2026-02-01',status: 'Active' },
-    { id: 2, name: 'Growth', price: 300, tps: 30, createdAt: '2026-02-05', status: 'Active' },
-    { id: 3, name: 'Enterprise', price: 500, tps: 100, createdAt: '2026-02-10', status: 'Active' }
-  ]);
-  const [loading] = useState(false);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
   const [modalShow, setModalShow] = useState(false);
   const [recordForEdit, setRecordForEdit] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+
+  const fetchSubscriptions = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await subscriptionService.list({ page: 0, size: 1000 });
+      const list = Array.isArray(result?.content) ? result.content : Array.isArray(result) ? result : [];
+      setData(list.map(normalizeSubscription));
+    } catch (e) {
+      setError(e.message || 'Failed to load subscriptions');
+      toast.error(e.message || 'Failed to load subscriptions');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchSubscriptions();
+  }, [fetchSubscriptions]);
 
   const columns = useMemo(
     () =>
-      SUBSCRIPTION_COLUMNS((record) => {
-        setRecordForEdit(record);
-        setModalShow(true);
-      }),
-    []
+      SUBSCRIPTION_COLUMNS(
+        (record) => {
+          setRecordForEdit(record);
+          setModalShow(true);
+        },
+        async (record) => {
+          try {
+            await subscriptionService.delete(record.id);
+            toast.success('Subscription plan deleted');
+            fetchSubscriptions();
+          } catch (e) {
+            toast.error(e.message || 'Failed to delete');
+          }
+        }
+      ),
+    [fetchSubscriptions]
   );
-
-  const { TableContainer } = UseTable(columns, data, loading);
 
   const filteredData = useMemo(() => {
     let list = Array.isArray(data) ? [...data] : [];
     if (query) {
       const q = query.toLowerCase();
       list = list.filter((row) =>
-        [row.name, row.price, row.tps, row.status, row.createdAt]
+        [row.name, row.code, row.priceMonthly, row.tpsLimit, row.status, row.createdAt]
           .filter((v) => v != null)
           .some((val) => String(val).toLowerCase().includes(q))
       );
@@ -86,45 +168,104 @@ const Subscriptions = () => {
     setRecordForEdit(null);
   };
 
-  const handleSubmit = () => {
-    handleCloseModal();
+  const handleSubmit = async (payload) => {
+    setSubmitting(true);
+    try {
+      if (recordForEdit?.id) {
+        await subscriptionService.update(recordForEdit.id, toSubscriptionPayload(payload));
+        toast.success('Subscription plan updated');
+      } else {
+        await subscriptionService.create(toSubscriptionPayload(payload));
+        toast.success('Subscription plan created');
+      }
+      handleCloseModal();
+      fetchSubscriptions();
+    } catch (e) {
+      toast.error(e.message || 'Failed to save');
+    } finally {
+      setSubmitting(false);
+    }
   };
+
+  const table = useAdvanceTable({
+    data: filteredData,
+    columns,
+    selection: true,
+    sortable: true,
+    pagination: true,
+    perPage: 25,
+    selectionColumnWidth: 30
+  });
 
   return (
     <>
-      <TablePageLayout
-        title="Subscriptions"
-        subtitle="Create and manage subscription plans and TPS limits."
-        toolbar={
-          <>
-            <div className="d-flex gap-2 flex-wrap align-items-center">
-              <Button variant="primary" size="sm" className="table-page-addButton" onClick={handleAdd}>
-                <FontAwesomeIcon icon="plus" className="me-1" />
-                Create Subscription
-              </Button>
-              <TableExportSelect
-                onExport={(type) => {
-                  if (type === 'print') window.print();
+      <AdvanceTableProvider {...table}>
+        <Card className="mb-3">
+          <Card.Header>
+            <Row className="flex-between-center">
+              <Col xs={4} sm="auto" className="d-flex align-items-center pe-0">
+                <h5 className="fs-9 mb-0 text-nowrap py-2 py-xl-0">Subscriptions</h5>
+              </Col>
+              <Col xs={12} sm="auto" className="ps-0">
+                <div id="subscriptions-actions" className="d-flex align-items-center flex-nowrap gap-2">
+                  <IconButton
+                    variant="primary"
+                    size="sm"
+                    icon="plus"
+                    transform="shrink-3"
+                    title="Create"
+                    onClick={handleAdd}
+                  >
+                    <span className="d-none d-sm-inline-block ms-1">New</span>
+                  </IconButton>
+                  <TableExportSelect
+                    icon="external-link-alt"
+                    variant="falcon-default"
+                    className="mx-2"
+                    onExport={(type) => {
+                      if (type === 'print') window.print();
+                    }}
+                  />
+                  <TableSearchInput
+                    className="table-page-filter"
+                    value={query}
+                    onChange={setQuery}
+                    placeholder="search ..."
+                  />
+                </div>
+              </Col>
+            </Row>
+          </Card.Header>
+          <Card.Body className="p-0">
+            {loading ? (
+              <div className="text-center py-5">
+                <Spinner animation="border" size="sm" />
+                <span className="ms-2">Loading...</span>
+              </div>
+            ) : (
+              <AdvanceTable
+                headerClassName="bg-200 text-nowrap align-middle"
+                rowClassName="align-middle white-space-nowrap"
+                tableProps={{
+                  size: 'sm',
+                  striped: true,
+                  className: 'fs-10 mb-0 overflow-hidden'
                 }}
               />
-            </div>
-            <Search
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search ..."
-              className="table-page-search"
-            />
-          </>
-        }
-      >
-        <TableContainer dataSource={filteredData} loading={loading} rowKey={(r) => r.id ?? r.name} />
-      </TablePageLayout>
+            )}
+          </Card.Body>
+          <Card.Footer>
+            <AdvanceTableFooter rowsPerPageSelection navButtons rowInfo />
+          </Card.Footer>
+        </Card>
+      </AdvanceTableProvider>
 
       <SubscriptionFormModal
         show={modalShow}
         record={recordForEdit}
         onClose={handleCloseModal}
         onSubmit={handleSubmit}
+        submitting={submitting}
       />
     </>
   );

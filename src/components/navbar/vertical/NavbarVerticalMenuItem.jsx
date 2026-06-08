@@ -11,7 +11,7 @@ const NavbarVerticalMenuItem = ({ route }) => {
           <FontAwesomeIcon icon={route.icon} />
         </span>
       )}
-      <span className="nav-link-text ps-1">{route.name}</span>
+      <span className={`nav-link-text${route.icon ? ' ps-1' : ''}`}>{route.name}</span>
       {route.badge && (
         <SubtleBadge pill bg={route.badge.type} className="ms-2">
           {route.badge.text}

@@ -1,27 +1,29 @@
 import React, { useEffect, useMemo } from 'react';
-import { Button } from 'react-bootstrap';
 import { UseModal, useForm, Forms, UseInput, UseSelect } from 'components/common/UseTable';
+import IconButton from 'components/common/IconButton';
 
-const UserFormModal = ({ show, onClose, onSubmit, record, roleLabel, title }) => {
-  const roleOptions = [
-    { id: 'Platform Admin', name: 'Platform Admin' },
-    { id: 'Company Admin', name: 'Company Admin' },
-    { id: 'Company Finance', name: 'Company Finance' },
-    { id: 'Client User', name: 'Client User' },
-    { id: 'Client Finance', name: 'Client Finance' }
-  ];
-  const statusOptions = [
-    { id: 'Active', name: 'Active' },
-    { id: 'Inactive', name: 'Inactive' }
-  ];
+// PLATFORM_ADMIN is an internal role, not assignable from this form.
+const roleOptions = [
+  { id: 'Company Admin', name: 'Company Admin' },
+  { id: 'Company Finance', name: 'Company Finance' },
+  { id: 'Client User', name: 'Client User' },
+  { id: 'Client Finance', name: 'Client Finance' }
+];
+const statusOptions = [
+  { id: 'Active', name: 'Active' },
+  { id: 'Inactive', name: 'Inactive' }
+];
 
+const UserFormModal = ({ show, onClose, onSubmit, record, roleLabel, title, companies = [], submitting = false }) => {
   const initialValues = useMemo(
     () => ({
       name: record?.name ?? '',
       email: record?.email ?? '',
       phone: record?.phone ?? '',
+      password: '',
       status: record?.status ?? 'Active',
-      role: record?.role ?? roleLabel ?? 'Company Admin'
+      role: record?.roles?.[0] ?? roleLabel ?? 'Company Admin',
+      companyId: record?.companyId ?? ''
     }),
     [record, roleLabel]
   );
@@ -33,33 +35,59 @@ const UserFormModal = ({ show, onClose, onSubmit, record, roleLabel, title }) =>
   }, [show, initialValues, setValues]);
 
   const handleSubmit = () => {
-    onSubmit?.(values);
-    onClose?.();
+    onSubmit?.({ ...values });
   };
+
+  const isPlatform = values.role === 'PLATFORM_ADMIN';
+  const isCreate = !record?.id;
+  const companyOptions = useMemo(
+    () => (companies || []).map((c) => ({ id: c.id, name: c.name })),
+    [companies]
+  );
 
   return (
     <UseModal
-      title={title || (record ? `Edit ${roleLabel}` : `Add ${roleLabel}`)}
+      title={title || (record ? `Edit ${roleLabel || 'User'}` : 'Add User')}
       isVisible={show}
       setIsVisible={() => {}}
       onCancel={onClose}
       footer={[
-        <Button key="cancel" variant="secondary" size="sm" onClick={onClose}>
+        <IconButton key="cancel" variant="falcon-default" size="sm" onClick={onClose}>
           Cancel
-        </Button>,
-        <Button key="submit" variant="primary" size="sm" type="submit" form="user-form">
-          {record ? 'Update' : 'Save'}
-        </Button>
+        </IconButton>,
+        <IconButton
+          key="submit"
+          variant="primary"
+          size="sm"
+          title={record ? 'Update' : 'Save'}
+          type="submit"
+          form="user-form"
+          disabled={submitting}
+        >
+          {submitting ? 'Saving...' : record ? 'Update' : 'Save'}
+        </IconButton>
       ]}
     >
       <Forms id="user-form" onFinish={handleSubmit}>
-        <UseInput
-          name="name"
-          label="Full Name"
-          value={values.name}
-          onChange={handleOnChange}
-          placeholder="John Doe"
-        />
+        {!isPlatform && (
+          <UseSelect
+            name="companyId"
+            label="Company"
+            value={values.companyId}
+            options={companyOptions}
+            onChange={(v) => setValues((prev) => ({ ...prev, companyId: v }))}
+            placeholder="Select company"
+          />
+        )}
+        {(!isPlatform || record) && (
+          <UseInput
+            name="name"
+            label="Full Name"
+            value={values.name}
+            onChange={handleOnChange}
+            placeholder="John Doe"
+          />
+        )}
         <UseInput
           name="email"
           label="Email"
@@ -68,13 +96,25 @@ const UserFormModal = ({ show, onClose, onSubmit, record, roleLabel, title }) =>
           onChange={handleOnChange}
           placeholder="user@example.com"
         />
-        <UseInput
-          name="phone"
-          label="Phone"
-          value={values.phone}
-          onChange={handleOnChange}
-          placeholder="+1 555 000 000"
-        />
+        {!isPlatform && (
+          <UseInput
+            name="phone"
+            label="Phone"
+            value={values.phone}
+            onChange={handleOnChange}
+            placeholder="+1 555 000 000"
+          />
+        )}
+        {isCreate && (
+          <UseInput
+            name="password"
+            label="Password"
+            type="password"
+            value={values.password}
+            onChange={handleOnChange}
+            placeholder={isPlatform ? 'Required' : 'Optional'}
+          />
+        )}
         <UseSelect
           name="role"
           label="User Type"

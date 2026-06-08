@@ -1,6 +1,10 @@
 import React, { useMemo, useState } from 'react';
-import { UseTable, Search, TableExportSelect, TableSelectFilter, TableDateRangeFilter } from 'components/common/UseTable';
+import TableSearchInput from 'components/common/TableSearchInput';
+import IconButton from 'components/common/IconButton';
+import { UseTable, TableSelectFilter, TableExportSelect } from 'components/common/UseTable';
 import TablePageLayout from 'components/common/TablePageLayout';
+import AdvanceTableDateRangeFilter from 'components/common/advance-table/AdvanceTableDateRangeFilter';
+import { getAuthUser } from 'components/authentication/authStorage';
 
 const BILLING_COLUMNS = [
   { title: 'Invoice #', dataIndex: 'invoice', key: 'invoice' },
@@ -13,6 +17,9 @@ const BILLING_COLUMNS = [
 ];
 
 const Billing = () => {
+  const user = getAuthUser();
+  const isPlatformAdmin = user?.roles?.includes('PLATFORM_ADMIN');
+  const isCompanyAdmin = user?.roles?.includes('COMPANY_ADMIN');
   const [data] = useState([]);
   const [loading] = useState(false);
   const [query, setQuery] = useState('');
@@ -40,7 +47,7 @@ const Billing = () => {
 
   const filteredData = useMemo(() => {
     let list = Array.isArray(data) ? [...data] : [];
-    if (filterProvider) list = list.filter((row) => String(row.provider) === String(filterProvider));
+    if ((isPlatformAdmin || isCompanyAdmin) && filterProvider) list = list.filter((row) => String(row.provider) === String(filterProvider));
     if (filterRange) list = list.filter((row) => String(row.range) === String(filterRange));
     if (filterStatus) list = list.filter((row) => String(row.status) === String(filterStatus));
     if (query) {
@@ -52,28 +59,30 @@ const Billing = () => {
       );
     }
     return list;
-  }, [data, filterProvider, filterRange, filterStatus, query]);
+  }, [data, filterProvider, filterRange, filterStatus, query, isPlatformAdmin]);
 
   return (
     <TablePageLayout
       title="Billing"
       subtitle="Review invoices and subscription billing history."
-      toolbar={
-        <>
+      topContent={
+        <div className="px-3 pt-3">
           <div className="d-flex flex-wrap gap-2 align-items-center">
-            <TableDateRangeFilter
+            <AdvanceTableDateRangeFilter
               value={dateRange}
               onChange={setDateRange}
-              className="table-page-filter table-page-date-range"
-              placeholder="Select dates"
-            />
-            <TableSelectFilter
               className="table-page-filter"
-              value={filterProvider}
-              placeholder="Filter Provider"
-              onChange={(value) => setFilterProvider(value)}
-              options={providerOptions}
+              placeholder="Date"
             />
+            {(isPlatformAdmin || isCompanyAdmin) && (
+              <TableSelectFilter
+                className="table-page-filter"
+                value={filterProvider}
+                placeholder="Filter Provider"
+                onChange={(value) => setFilterProvider(value)}
+                options={providerOptions}
+              />
+            )}
             <TableSelectFilter
               className="table-page-filter"
               value={filterRange}
@@ -88,22 +97,43 @@ const Billing = () => {
               onChange={(value) => setFilterStatus(value)}
               options={statusOptions}
             />
-            <TableExportSelect
-              onExport={(type) => {
-                if (type === 'print') window.print();
-              }}
-            />
           </div>
-          <Search
+        </div>
+      }
+      toolbar={
+        <>
+          <IconButton
+            variant="primary"
+            size="sm"
+            icon="plus"
+            transform="shrink-3"
+            title="New"
+          >
+            <span className="d-none d-sm-inline-block ms-1">New</span>
+          </IconButton>
+          <TableExportSelect
+            icon="external-link-alt"
+            variant="falcon-default"
+            className="mx-2"
+            onExport={(type) => {
+              if (type === 'print') window.print();
+            }}
+          />
+          <TableSearchInput
+            className="table-page-filter"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search ..."
-            className="table-page-search"
+            onChange={setQuery}
+            placeholder="search ..."
           />
         </>
       }
     >
-      <TableContainer dataSource={filteredData} loading={loading} rowKey={(r) => r.id ?? r.invoice} />
+      <TableContainer
+        dataSource={filteredData}
+        loading={loading}
+        rowKey={(r) => r.id ?? r.invoice}
+        className="table-sm fs-10 mb-0 overflow-hidden"
+      />
     </TablePageLayout>
   );
 };

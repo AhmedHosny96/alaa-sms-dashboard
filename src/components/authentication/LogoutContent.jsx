@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Button } from 'react-bootstrap';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import logoutImg from 'assets/img/icons/spot-illustrations/45.png';
 import paths from 'routes/paths';
@@ -8,14 +8,17 @@ import { clearAuthUser } from './authStorage';
 
 const loginPaths = {
   simple: paths.simpleLogin,
-  split: paths.splitLogin,
-  card: paths.cardLogin
+  split: paths.simpleLogin,
+  card: paths.simpleLogin
 };
 
 const LogoutContent = ({ layout = 'simple', titleTag: TitleTag = 'h4' }) => {
+  const navigate = useNavigate();
+
   useEffect(() => {
     clearAuthUser();
-  }, []);
+    navigate(paths.simpleLogin, { replace: true });
+  }, [navigate]);
 
   return (
     <>

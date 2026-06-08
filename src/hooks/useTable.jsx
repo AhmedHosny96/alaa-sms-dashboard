@@ -1,10 +1,16 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
-import { Table, Form, Button, Spinner } from 'react-bootstrap';
+import { Form, Button, Spinner } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Flex from 'components/common/Flex';
 import classNames from 'classnames';
+import AdvanceTable from 'components/common/advance-table/AdvanceTable';
+import AdvanceTableProvider from 'providers/AdvanceTableProvider';
+import useAdvanceTable from 'hooks/useAdvanceTable';
 
-const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
+const SMALL_PAGE_SIZE_OPTIONS = [5, 50, 100, 500];
+const LARGE_PAGE_SIZE_OPTIONS = [500, 1000, 5000, 10000];
+const DEFAULT_SMALL_PAGE_SIZE = 100;
+const DEFAULT_LARGE_PAGE_SIZE = 500;
 
 function defaultGetRowKey(record, index) {
   if (record?.key != null) return record.key;
@@ -15,7 +21,12 @@ function defaultGetRowKey(record, index) {
 
 export function useTable(columns, data, loading = false, options = {}) {
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(options.defaultPageSize ?? 10);
+  const [pageSize, setPageSize] = useState(
+    options.defaultPageSize ??
+      (options.pageSizePreset === 'large'
+        ? DEFAULT_LARGE_PAGE_SIZE
+        : DEFAULT_SMALL_PAGE_SIZE)
+  );
   const [sortField, setSortField] = useState(options.defaultSortField ?? null);
   const [sortOrder, setSortOrder] = useState(options.defaultSortOrder ?? null);
   const [filteredInfo, setFilteredInfo] = useState(options.initialFilters ?? {});
@@ -23,9 +34,10 @@ export function useTable(columns, data, loading = false, options = {}) {
   const effectiveData = useMemo(() => {
     let list = Array.isArray(data) ? [...data] : [];
     const sortCol = columns?.find((c) => (c.dataIndex ?? c.key) === sortField);
-    if (sortField && sortOrder && sortCol?.sorter) {
+    const sorter = resolveSorter(sortCol);
+    if (sortField && sortOrder && sorter) {
       list.sort((a, b) => {
-        const cmp = sortCol.sorter(a, b);
+        const cmp = sorter(a, b);
         return sortOrder === 'descend' ? -cmp : cmp;
       });
     }
@@ -88,6 +100,9 @@ export function useTable(columns, data, loading = false, options = {}) {
       loading: propsLoading,
       rowKey: rowKeyProp,
       onChange: propsOnChange,
+      headerClassName,
+      rowClassName,
+      bodyClassName,
       ...tableRest
     } = props;
 
@@ -101,9 +116,10 @@ export function useTable(columns, data, loading = false, options = {}) {
     const displayData = useMemo(() => {
       let list = Array.isArray(effectiveDataSource) ? [...effectiveDataSource] : [];
       const col = effectiveColumns?.find((c) => (c.dataIndex ?? c.key) === sortField);
-      if (sortField && sortOrder && col?.sorter) {
+      const sorter = resolveSorter(col);
+      if (sortField && sortOrder && sorter) {
         list.sort((a, b) => {
-          const cmp = col.sorter(a, b);
+          const cmp = sorter(a, b);
           return sortOrder === 'descend' ? -cmp : cmp;
         });
       }
@@ -116,9 +132,52 @@ export function useTable(columns, data, loading = false, options = {}) {
     const displayPageData = displayData.slice(displayStart, displayEnd);
     const displayTotalPages = Math.max(1, Math.ceil(displayTotalCount / pageSize));
 
+    const resolvedPreset = options.pageSizePreset === 'large' || options.pageSizePreset === 'small'
+      ? options.pageSizePreset
+      : displayTotalCount >= 500
+        ? 'large'
+        : 'small';
+
+    const pageSizeOptions = Array.isArray(options.pageSizeOptions) && options.pageSizeOptions.length
+      ? options.pageSizeOptions
+      : resolvedPreset === 'large'
+        ? LARGE_PAGE_SIZE_OPTIONS
+        : SMALL_PAGE_SIZE_OPTIONS;
+
     useEffect(() => {
       if (displayTotalPages > 0 && page > displayTotalPages) setPage(displayTotalPages);
     }, [displayTotalPages, page]);
+
+    useEffect(() => {
+      if (pageSizeOptions.length && !pageSizeOptions.includes(pageSize)) {
+        const nextSize = pageSizeOptions[0];
+        setPageSize(nextSize);
+        setPage(1);
+        notifyChange(
+          { current: 1, pageSize: nextSize },
+          filteredInfo,
+          { field: sortField, order: sortOrder }
+        );
+      }
+    }, [pageSizeOptions, pageSize, filteredInfo, sortField, sortOrder]);
+
+    const mappedColumns = useMemo(
+      () =>
+        mapColumnsToAdvance(effectiveColumns, {
+          sortField,
+          sortOrder,
+          onSort: handleSort,
+          resolveSorter
+        }),
+      [effectiveColumns, sortField, sortOrder]
+    );
+    const advanceTable = useAdvanceTable({
+      columns: mappedColumns,
+      data: displayPageData,
+      sortable: false,
+      selection: false,
+      pagination: false
+    });
 
     return (
       <div
@@ -133,99 +192,18 @@ export function useTable(columns, data, loading = false, options = {}) {
             <Spinner animation="border" variant="primary" />
           </div>
         )}
-        <div className="table-responsive scrollbar">
-          <Table
-            className="table-sm fs--1 mb-0 overflow-hidden"
-            style={{ overflowX: 'auto' }}
-            {...tableRest}
-          >
-            <thead className="bg-200 text-900">
-              <tr>
-                {effectiveColumns?.map((col) => {
-                  const colKey = col.dataIndex ?? col.key;
-                  const hasSorter = typeof col.sorter === 'function';
-                  const isSorted = sortField === colKey;
-                  const filtered = (filteredInfo[colKey]?.length ?? 0) > 0;
-                  return (
-                    <th
-                      key={colKey}
-                      className={classNames('text-nowrap', col.headerClassName, {
-                        'text-start': col.align === 'left' || !col.align,
-                        'text-end': col.align === 'right',
-                        'text-center': col.align === 'center',
-                        'cursor-pointer': hasSorter
-                      })}
-                      style={col.width ? { width: col.width } : undefined}
-                      onClick={hasSorter ? () => handleSort(col) : undefined}
-                    >
-                      <Flex alignItems="center" className="gap-1">
-                        {typeof col.title === 'function' ? col.title() : col.title}
-                        {hasSorter && (
-                          <FontAwesomeIcon
-                            icon={isSorted && sortOrder === 'descend' ? 'sort-amount-down' : 'sort-amount-up'}
-                            className={classNames('fs--2', !isSorted && 'opacity-50')}
-                          />
-                        )}
-                        {col.filterDropdown && (
-                          <FilterDropdownCell
-                            column={col}
-                            filteredValue={filteredInfo[colKey] ?? null}
-                            onConfirm={(keys) => handleFilterConfirm(colKey, keys)}
-                            onClear={() => handleFilterClear(colKey)}
-                            filterIcon={col.filterIcon}
-                            filtered={filtered}
-                          />
-                        )}
-                      </Flex>
-                    </th>
-                  );
-                })}
-              </tr>
-            </thead>
-            <tbody className="list">
-              {displayPageData.length === 0 && !effectiveLoading ? (
-                <tr>
-                  <td
-                    colSpan={effectiveColumns?.length ?? 1}
-                    className="text-center text-700 py-5"
-                  >
-                    No records
-                  </td>
-                </tr>
-              ) : (
-                displayPageData.map((record, index) => (
-                  <tr key={effectiveRowKey(record, displayStart + index)}>
-                    {effectiveColumns?.map((col) => {
-                      const colKey = col.dataIndex ?? col.key;
-                      const value =
-                        col.dataIndex != null
-                          ? typeof col.dataIndex === 'string'
-                            ? record[col.dataIndex]
-                            : col.dataIndex.reduce((acc, k) => acc?.[k], record)
-                          : record;
-                      const content =
-                        typeof col.render === 'function'
-                          ? col.render(value, record, displayStart + index)
-                          : value;
-                      return (
-                        <td
-                          key={colKey}
-                          className={classNames(col.className, {
-                            'text-start': col.align === 'left' || !col.align,
-                            'text-end': col.align === 'right',
-                            'text-center': col.align === 'center'
-                          })}
-                        >
-                          {content}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </Table>
-        </div>
+        <AdvanceTableProvider {...advanceTable}>
+          <AdvanceTable
+            headerClassName={classNames('bg-200 text-900 text-nowrap align-middle', headerClassName)}
+            bodyClassName={classNames('list', bodyClassName)}
+            rowClassName={classNames('align-middle white-space-nowrap', rowClassName)}
+            emptyMessage="No records"
+            tableProps={{
+              ...tableRest,
+              className: classNames('table-sm fs--1 mb-0 overflow-hidden', tableRest.className)
+            }}
+          />
+        </AdvanceTableProvider>
         {displayTotalCount > 0 && (
           <Flex
             alignItems="center"
@@ -243,7 +221,7 @@ export function useTable(columns, data, loading = false, options = {}) {
                 value={pageSize}
                 onChange={handlePageSizeChange}
               >
-                {PAGE_SIZE_OPTIONS.map((n) => (
+                {pageSizeOptions.map((n) => (
                   <option key={n} value={n}>
                     {n}
                   </option>
@@ -290,6 +268,97 @@ export function useTable(columns, data, loading = false, options = {}) {
     sortOrder,
     filteredInfo,
     setFilteredInfo
+  };
+}
+
+function mapColumnsToAdvance(columns = [], config = {}) {
+  const { sortField, sortOrder, onSort, resolveSorter } = config;
+
+  return columns.map((col, index) => {
+    const colKey = col.dataIndex ?? col.key ?? col.title ?? `col-${index}`;
+    const accessorKey = typeof col.dataIndex === 'string' ? col.dataIndex : undefined;
+    const accessorFn = Array.isArray(col.dataIndex)
+      ? (row) => col.dataIndex.reduce((acc, k) => acc?.[k], row)
+      : col.dataIndex == null
+        ? (row) => row
+        : undefined;
+    const alignClass = classNames({
+      'text-end': col.align === 'right',
+      'text-center': col.align === 'center',
+      'text-start': col.align === 'left' || !col.align
+    });
+    const isActions = colKey === 'actions' || col.dataIndex === 'actions' || col.key === 'actions';
+    const sorter = resolveSorter?.(col);
+    const isSortable = Boolean(sorter) && !isActions;
+    const isSorted = sortField === colKey;
+    const sortClass = isSortable
+      ? classNames('sort', isSorted && (sortOrder === 'descend' ? 'desc' : 'asc'))
+      : undefined;
+
+    return {
+      id: String(colKey),
+      accessorKey,
+      accessorFn,
+      header: () => (typeof col.title === 'function' ? col.title() : col.title),
+      enableSorting: false,
+      cell: (ctx) => {
+        const record = ctx.row.original;
+        const value =
+          col.dataIndex != null
+            ? typeof col.dataIndex === 'string'
+              ? record?.[col.dataIndex]
+              : Array.isArray(col.dataIndex)
+                ? col.dataIndex.reduce((acc, k) => acc?.[k], record)
+                : record
+            : record;
+        return typeof col.render === 'function'
+          ? col.render(value, record, ctx.row.index)
+          : value;
+      },
+      meta: {
+        headerProps: {
+          className: classNames(
+            col.headerClassName,
+            alignClass,
+            'fw-semibold',
+            sortClass
+          ),
+          style: col.width ? { width: col.width } : undefined,
+          onClick: isSortable ? () => onSort?.(col) : undefined
+        },
+        cellProps: {
+          className: classNames(col.className, alignClass)
+        }
+      }
+    };
+  });
+}
+
+function resolveSorter(col) {
+  if (!col) return null;
+  if (typeof col.sorter === 'function') return col.sorter;
+  if (col.sorter === false) return null;
+
+  const dataIndex = col.dataIndex;
+  if (!dataIndex) return null;
+
+  const getValue = (row) =>
+    typeof dataIndex === 'string'
+      ? row?.[dataIndex]
+      : Array.isArray(dataIndex)
+        ? dataIndex.reduce((acc, k) => acc?.[k], row)
+        : row;
+
+  return (a, b) => {
+    const av = getValue(a);
+    const bv = getValue(b);
+    if (av == null && bv == null) return 0;
+    if (av == null) return -1;
+    if (bv == null) return 1;
+    const an = Number(av);
+    const bn = Number(bv);
+    if (!Number.isNaN(an) && !Number.isNaN(bn)) return an - bn;
+    return String(av).localeCompare(String(bv));
   };
 }
 

@@ -1,6 +1,9 @@
 import React, { useMemo, useState } from 'react';
-import { UseTable, Search, TableExportSelect, TableSelectFilter, TableDateRangeFilter } from 'components/common/UseTable';
+import { UseTable, TableExportSelect, TableSelectFilter } from 'components/common/UseTable';
+import TableSearchInput from 'components/common/TableSearchInput';
 import TablePageLayout from 'components/common/TablePageLayout';
+import AdvanceTableDateRangeFilter from 'components/common/advance-table/AdvanceTableDateRangeFilter';
+import { getAuthUser } from 'components/authentication/authStorage';
 
 const LOG_COLUMNS = [
   { title: 'Timestamp', dataIndex: 'timestamp', key: 'timestamp' },
@@ -12,6 +15,9 @@ const LOG_COLUMNS = [
 ];
 
 const SystemLogs = () => {
+  const user = getAuthUser();
+  const isPlatformAdmin = user?.roles?.includes('PLATFORM_ADMIN');
+  const isCompanyAdmin = user?.roles?.includes('COMPANY_ADMIN');
   const [data] = useState([]);
   const [loading] = useState(false);
   const [query, setQuery] = useState('');
@@ -35,11 +41,14 @@ const SystemLogs = () => {
   ];
 
   const columns = useMemo(() => LOG_COLUMNS, []);
-  const { TableContainer } = UseTable(columns, data, loading);
+  const { TableContainer } = UseTable(columns, data, loading, {
+    pageSizePreset: 'large',
+    defaultPageSize: 500
+  });
 
   const filteredData = useMemo(() => {
     let list = Array.isArray(data) ? [...data] : [];
-    if (filterProvider) list = list.filter((row) => String(row.provider) === String(filterProvider));
+    if ((isPlatformAdmin || isCompanyAdmin) && filterProvider) list = list.filter((row) => String(row.provider) === String(filterProvider));
     if (filterRange) list = list.filter((row) => String(row.range) === String(filterRange));
     if (filterLevel) list = list.filter((row) => String(row.level) === String(filterLevel));
     if (query) {
@@ -51,7 +60,7 @@ const SystemLogs = () => {
       );
     }
     return list;
-  }, [data, filterProvider, filterRange, filterLevel, query]);
+  }, [data, filterProvider, filterRange, filterLevel, query, isPlatformAdmin]);
 
   return (
     <TablePageLayout
@@ -60,19 +69,21 @@ const SystemLogs = () => {
       toolbar={
         <>
           <div className="d-flex flex-wrap gap-2 align-items-center">
-            <TableDateRangeFilter
+            <AdvanceTableDateRangeFilter
               value={dateRange}
               onChange={setDateRange}
-              className="table-page-filter table-page-date-range"
-              placeholder="Select dates"
-            />
-            <TableSelectFilter
               className="table-page-filter"
-              value={filterProvider}
-              placeholder="Filter Provider"
-              onChange={(value) => setFilterProvider(value)}
-              options={providerOptions}
+              placeholder="Date"
             />
+            {(isPlatformAdmin || isCompanyAdmin) && (
+              <TableSelectFilter
+                className="table-page-filter"
+                value={filterProvider}
+                placeholder="Filter Provider"
+                onChange={(value) => setFilterProvider(value)}
+                options={providerOptions}
+              />
+            )}
             <TableSelectFilter
               className="table-page-filter"
               value={filterRange}
@@ -93,11 +104,11 @@ const SystemLogs = () => {
               }}
             />
           </div>
-          <Search
+          <TableSearchInput
+            className="table-page-filter"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={setQuery}
             placeholder="Search ..."
-            className="table-page-search"
           />
         </>
       }

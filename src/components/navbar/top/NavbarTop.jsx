@@ -133,9 +133,9 @@ const NavbarTopElements = ({
           className={`align-items-center d-none d-${topNavbarBreakpoint}-block`}
           as="ul"
         >
-          <Nav.Item as="li">
+          {/* <Nav.Item as="li">
             <SearchBox autoCompleteItem={autoCompleteInitialItem} />
-          </Nav.Item>
+          </Nav.Item> */}
         </Nav>
       )}
       <TopNavRightSideNavItem />

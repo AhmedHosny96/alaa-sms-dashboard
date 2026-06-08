@@ -14,6 +14,15 @@
   overflow: visible;
 }
 
+.table-page-header-actions {
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.table-page-header-actions > * {
+  margin: 0;
+}
+
 .table-page-addButton {
   margin-right: 12px;
 }
@@ -32,10 +41,104 @@
   max-width: 300px;
 }
 
+.table-page-search input[type='search'] {
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.table-page-search input[type='search']::-webkit-search-decoration,
+.table-page-search input[type='search']::-webkit-search-cancel-button,
+.table-page-search input[type='search']::-webkit-search-results-button,
+.table-page-search input[type='search']::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+}
+
+.table-page-search input::-ms-clear,
+.table-page-search input::-ms-reveal {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.table-page-search input::-webkit-outer-spin-button,
+.table-page-search input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.table-page-search input[type='number'] {
+  appearance: textfield;
+}
+
 .table-page-toolbar .react-datepicker-wrapper,
 .table-page-toolbar .react-datepicker__input-container {
   width: auto;
   display: inline-flex;
+}
+
+.table-select-filter .react-select__control {
+  min-height: 31px;
+  height: 31px;
+  min-width: 150px;
+  border-color: var(--bs-border-color);
+  background-color: var(--bs-btn-bg, var(--bs-gray-100));
+  box-shadow: none;
+  padding: 0 6px;
+}
+
+.table-select-filter .react-select__control--is-focused {
+  border-color: var(--bs-border-color);
+  box-shadow: none;
+}
+
+.table-select-filter .react-select__value-container {
+  padding: 0;
+  user-select: none;
+}
+
+.table-select-filter .react-select__input-container {
+  margin: 0;
+  padding: 0;
+}
+
+.table-select-filter .react-select__indicator-separator {
+  display: none;
+}
+
+.table-select-filter .react-select__dropdown-indicator {
+  padding: 0 4px;
+}
+
+.table-select-filter .react-select__single-value,
+.table-select-filter .react-select__placeholder {
+  font-size: 0.75rem;
+  color: var(--bs-gray-700);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  user-select: none;
+}
+
+.table-select-filter .react-select__menu {
+  min-width: 180px;
+  font-size: 0.75rem;
+}
+
+.table-select-filter .react-select__option {
+  white-space: nowrap;
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  min-height: 28px;
+}
+
+.table-select-filter .react-select__menu-list {
+  padding: 4px;
+}
+
+.table-select-filter .react-select__option--is-selected,
+.table-select-filter .react-select__option--is-focused {
+  background-color: var(--bs-gray-100);
+  color: var(--bs-gray-900);
 }
 
 .range-form {
@@ -145,7 +248,7 @@
 }
 
 .cdr-toolbar-inline {
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   overflow: visible;
   gap: 8px;
 }
@@ -155,13 +258,61 @@
 }
 
 .table-page-date-range {
-  max-width: 170px;
+  max-width: 240px;
+  min-width: 210px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.advance-table tbody td {
+  font-weight: 600;
+}
+
+.advance-table .badge.bg-success,
+.advance-table .badge.bg-soft-success {
+  color: #00f382 !important;
+  border: 1px solid #00f382 !important;
+  background-color: #ffffff !important;
+}
+
+.advance-table .badge.bg-secondary,
+.advance-table .badge.bg-soft-secondary {
+  color: #6c757d !important;
+  border: 1px solid #6c757d !important;
+  background-color: #ffffff !important;
+}
+
 .cdr-table {
   min-width: 1400px;
+}
+
+@media (max-width: 992px) {
+  .table-page-toolbar {
+    justify-content: flex-start;
+  }
+
+  .cdr-toolbar-inline {
+    flex-wrap: wrap;
+  }
+
+  .table-page-toolbar .table-page-filter,
+  .table-page-toolbar .react-select__control,
+  .table-page-toolbar .search-select,
+  .table-page-toolbar .search-select__control,
+  .table-page-toolbar .react-datepicker-wrapper,
+  .table-page-toolbar .react-datepicker__input-container,
+  .table-page-search {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .table-page-search {
+    margin-left: 0;
+  }
+
+  .table-page-header-actions {
+    flex-wrap: wrap;
+  }
 }
 

@@ -37,7 +37,7 @@ const Search = ({ onChange, size = 'medium', placeholder = 'search ...', value, 
       />
       <Button
         size={bsSize}
-        variant="outline-primary"
+        variant="falcon-default"
         className="border-300"
         onClick={handleSubmit}
       >

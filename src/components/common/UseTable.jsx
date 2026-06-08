@@ -6,6 +6,7 @@ export { default as TableExportSelect } from 'components/common/TableExportSelec
 export { default as TableSelectFilter } from 'components/common/TableSelectFilter';
 export { default as TableDateRangeFilter } from 'components/common/TableDateRangeFilter';
 export { default as TableGroupBySelect } from 'components/common/TableGroupBySelect';
+export { default as ConfirmAction } from 'components/common/ConfirmAction';
 export { default as ConfirmDelete } from 'components/common/ConfirmDelete';
 export { default as UseModal } from 'components/common/UseModal';
 export { default as Steps } from 'components/common/Steps';

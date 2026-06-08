@@ -34,7 +34,7 @@ const ProfileDropdown = () => {
           {/* <Dropdown.Item as={Link} to={paths.userSettings}>
             Settings
           </Dropdown.Item> */}
-          <Dropdown.Item as={Link} to={paths.cardLogin}>
+          <Dropdown.Item as={Link} to={paths.splitLogout}>
             Logout
           </Dropdown.Item>
         </div>

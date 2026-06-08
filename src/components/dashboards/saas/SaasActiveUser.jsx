@@ -47,15 +47,19 @@ const getOptions = (getThemeColor, data) => ({
   grid: { right: '0px', left: '0px', bottom: '0px', top: '0px' }
 });
 
-const SaasActiveUser = ({ data }) => {
+const SaasActiveUser = ({
+  data,
+  title = 'Active SMS Users',
+  totalLabel
+}) => {
   const { getThemeColor } = useAppContext();
   return (
     <Card className="h-100">
       <Card.Body>
         <Row className="flex-between-center g-0">
           <Col xs={6} className="d-lg-block flex-between-center">
-            <h6 className="mb-2 text-900">Active Users</h6>
-            <h4 className="fs-6 fw-normal text-700 mb-0">765k</h4>
+            <h6 className="mb-2 text-900">{title}</h6>
+            <h4 className="fs-6 fw-normal text-700 mb-0">{totalLabel ?? '765k'}</h4>
           </Col>
           <Col xs="auto" className="h-100">
             <BasicECharts

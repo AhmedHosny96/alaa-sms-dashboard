@@ -30,7 +30,7 @@ const RecentPurchasesHeader = () => {
             </Button>
           </div>
         ) : (
-          <div id="orders-actions">
+          <div id="orders-actions" className="d-flex align-items-center flex-nowrap gap-2">
             <IconButton
               variant="falcon-default"
               size="sm"

@@ -235,11 +235,17 @@ import {
   faColumns,
   faBuilding,
   faMoneyBill,
+  faNewspaper,
   faCommentSms,
   faServer,
   faDatabase,
   faNetworkWired,
-  faSatelliteDish
+  faSatelliteDish,
+  faTry,
+  faUserSlash,
+  faUserCheck,
+  faSync,
+  faStop
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -480,9 +486,14 @@ library.add(
   faColumns,
   faBuilding,
   faMoneyBill,
+  faNewspaper,
   faCommentSms,
   faServer,
   faDatabase,
   faNetworkWired,
   faSatelliteDish,
+  faUserSlash,
+  faUserCheck,
+  faSync,
+  faStop,
 );

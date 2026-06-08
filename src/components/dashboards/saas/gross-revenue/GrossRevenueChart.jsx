@@ -57,12 +57,12 @@ const tooltipFormatter = (params, selectedMonth, previousMonth) => {
 
 const getOption = (getThemeColor, data, selectedMonth, previousMonth) => ({
   title: {
-    text: 'Sales over time',
+    text: 'Profit over time',
     left: 'left',
-    top: 'top',
+    top: 2,
     textStyle: {
       fontWeight: 500,
-      fontSize: 13,
+      fontSize: 11,
       fontFamily: 'poppins'
     }
   },
@@ -161,10 +161,10 @@ const getOption = (getThemeColor, data, selectedMonth, previousMonth) => ({
     }
   ],
   grid: {
-    right: -2,
-    left: 2,
+    right: 2,
+    left: 0,
     bottom: 8,
-    top: 40,
+    top: 28,
     outerBoundsMode: 'same',
     outerBoundsContain: 'axisLabel'
   }

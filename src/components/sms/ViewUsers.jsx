@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Badge } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { UseTable, TableToolbar, Search, TableExportSelect, ConfirmDelete, UseModal, useForm, Forms, UseInput, UseSelect } from 'components/common/UseTable';
+import { UseTable, TableToolbar, TableExportSelect, ConfirmDelete, UseModal, useForm, Forms, UseInput, UseSelect } from 'components/common/UseTable';
+import TableSearchInput from 'components/common/TableSearchInput';
 import TablePageLayout from 'components/common/TablePageLayout';
 
 const USERS_COLUMNS = (onEdit, onDelete) => [
@@ -120,11 +121,11 @@ const ViewUsers = () => {
                 }}
               />
             </div>
-            <Search
+            <TableSearchInput
+              className="table-page-filter"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={setQuery}
               placeholder="search ..."
-              className="table-page-search"
             />
           </>
         }

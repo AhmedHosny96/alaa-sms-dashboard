@@ -1,76 +1,54 @@
-import React, { useRef, useState } from 'react';
-import { Card, Col, Row, ButtonGroup, Button } from 'react-bootstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import Stat from './Stat';
-import CandleChartBody from './CandleChartBody';
+import React from 'react';
+import { Card, Col, Form, Row, Table } from 'react-bootstrap';
 import { candleChartStatsData } from 'data/dashboard/saas';
 
-const CandleChart = ({ data }) => {
-  const chartRef = useRef(null);
-  const [zoomStart] = useState(0);
-  const [zoomEnd, setZoomEnd] = useState(70);
-
-  const zoomInAction = () => {
-    zoomEnd > 10 && setZoomEnd(zoomEnd - 10);
-  };
-
-  const zoomOutAction = () => {
-    zoomEnd < 100 && setZoomEnd(zoomEnd + 10);
-  };
+const CandleChart = ({ data, title = 'SMS Trend' }) => {
+  const tableRows = candleChartStatsData.map(item => ({
+    id: item.id,
+    metric: item.title,
+    current: item.amount,
+    previous: item.title === 'Queued SMS' ? '1,772' : item.title === 'Delivered SMS' ? '980' : '$229,312',
+    change: `${item.grow.isGrow ? '+' : '-'}${item.grow.growAmount}%`,
+    isUp: item.grow.isGrow
+  }));
 
   return (
     <Card className="h-100" dir="ltr">
       <Card.Header>
         <Row className="flex-between-center">
           <Col xs="auto">
-            <h6 className="mb-2">Candle Chart</h6>
+            <h6 className="mb-0">{title}</h6>
           </Col>
-          <Col xs="auto" className="mt-2">
-            <Row className="g-sm-4">
-              {candleChartStatsData.map((stat, index) => (
-                <Stat
-                  key={stat.id}
-                  statInfo={stat}
-                  isLast={index === candleChartStatsData.length - 1}
-                />
-              ))}
-            </Row>
+          <Col md="auto" className="order-1 order-md-0 mt-3 mt-md-0">
+            <Form.Select size="sm" className="pe-4">
+              <option>Last Month</option>
+              <option>Last Quarter</option>
+              <option>Last Year</option>
+            </Form.Select>
           </Col>
         </Row>
       </Card.Header>
-      <Card.Body className="pe-0 position-relative">
-        <ButtonGroup
-          className="position-absolute z-1 top-0 d-inline-block"
-          role="group"
-          style={{ left: '20px', right: '20px' }}
-          dir="ltr"
-        >
-          <Button
-            variant="falcon-default"
-            size="sm"
-            className="mb-1"
-            onClick={zoomInAction}
-            disabled={zoomEnd <= 10}
-          >
-            <FontAwesomeIcon icon="plus" />
-          </Button>
-          <Button
-            variant="falcon-default"
-            size="sm"
-            className="mb-1"
-            onClick={zoomOutAction}
-            disabled={zoomEnd >= 100}
-          >
-            <FontAwesomeIcon icon="minus" />
-          </Button>
-        </ButtonGroup>
-        <CandleChartBody
-          ref={chartRef}
-          zoomStart={zoomStart}
-          zoomEnd={zoomEnd}
-          data={data}
-          style={{ height: '20.5rem' }}
-        />
+      <Card.Body className="pt-0">
+        <Table responsive className="mb-0 fs-10 align-middle">
+          <thead className="text-700">
+            <tr>
+              <th>Metric</th>
+              <th className="text-end">Current</th>
+              <th className="text-end">Previous</th>
+              <th className="text-end">Change</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tableRows.map(row => (
+              <tr key={row.id}>
+                <td className="fw-semibold text-900">{row.metric}</td>
+                <td className="text-end">{row.current}</td>
+                <td className="text-end text-700">{row.previous}</td>
+                <td className={`text-end fw-semibold ${row.isUp ? 'text-success' : 'text-danger'}`}>{row.change}</td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
       </Card.Body>
     </Card>
   );

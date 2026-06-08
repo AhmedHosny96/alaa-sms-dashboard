@@ -8,11 +8,13 @@ import { Link } from 'react-router';
 import SubtleBadge from 'components/common/SubtleBadge';
 import SimpleBar from 'simplebar-react';
 import FalconLink from 'components/common/FalconLink';
+import txPlaceholder from 'assets/img/logos/bs-5.png';
 
 const TransactionItem = ({
   summary: { img, title, subtitle, status, amount, date },
   isLast
 }) => {
+  const src = img || txPlaceholder;
   return (
     <tr className={classNames({ 'border-0': isLast })}>
       <td
@@ -21,7 +23,7 @@ const TransactionItem = ({
         })}
       >
         <Flex alignItems="center" className="position-relative">
-          <Image src={img} alt={title} className="me-2" width={30} />
+          <Image src={src} alt={title} className="me-2" width={30} />
           <div className="flex-1">
             <Link to="#!" className="stretched-link">
               <h6 className="mb-0">{title}</h6>
@@ -59,7 +61,7 @@ const TransactionItem = ({
         style={{ width: '130px', minWidth: '130px' }}
       >
         <Form.Select size="sm" className="px-2">
-          <option value="action">Action</option>
+          <option value="action">Update</option>
           <option value="archive">Archive</option>
           <option value="delete">Delete</option>
         </Form.Select>
@@ -68,11 +70,11 @@ const TransactionItem = ({
   );
 };
 
-const TransactionSummary = ({ data: transactions }) => {
+const TransactionSummary = ({ data: transactions, title = 'SMS Activity Summary' }) => {
   return (
     <Card className="overflow-hidden">
       <FalconCardHeader
-        title="Transaction Summary"
+        title={title}
         titleTag="h6"
         className="py-2"
         light
@@ -104,7 +106,7 @@ const TransactionSummary = ({ data: transactions }) => {
             </Form.Select>
           </Col>
           <Col xs="auto">
-            <FalconLink title="View All" className="px-0 fw-medium" />
+            <FalconLink title="View all logs" className="px-0 fw-medium" />
           </Col>
         </Row>
       </Card.Footer>

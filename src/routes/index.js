@@ -1,3 +1,4 @@
+import ClientsList from 'components/sms/ClientsList';
 import React, { Suspense, lazy } from 'react';
 import App from 'App';
 import paths, { rootPaths } from './paths';
@@ -88,9 +89,7 @@ const Analytics = lazy(() => import('components/dashboards/analytics'));
 const Crm = lazy(() =>
   import('components/dashboards/crm')
 );
-const Saas = lazy(() =>
-  import('components/dashboards/saas')
-);
+import Dashboard from 'components/dashboards/saas';
 import Profile from 'components/pages/user/profile/Profile';
 import Associations from 'components/pages/asscociations/Associations';
 import Followers from 'components/app/social/followers/Followers';
@@ -188,7 +187,6 @@ import SplitForgetPassword from 'components/authentication/split/ForgetPassword'
 import SplitPasswordReset from 'components/authentication/split/PasswordReset';
 import SplitConfirmMail from 'components/authentication/split/ConfirmMail';
 import SplitLockScreen from 'components/authentication/split/LockScreen';
-const Dashboard = lazy(() => import('components/dashboards/default'));
 import Faq from 'components/documentation/Faq';
 const SupportDesk = lazy(() => import('components/dashboards/support-desk'));
 import TableView from 'components/app/support-desk/tickets-layout/TableView';
@@ -199,13 +197,11 @@ import TicketsPreview from 'components/app/support-desk/tickets-preview/TicketsP
 import QuickLinks from 'components/app/support-desk/quick-links/QuickLinks';
 import Reports from 'components/app/support-desk/reports/Reports';
 // SMS Platform Components
-import SmsDashboard from 'components/sms/SmsDashboard';
 import DomainList from 'components/sms/DomainList';
 import ListProviders from 'components/sms/ListProviders';
 import CompaniesList from 'components/sms/CompaniesList';
 import AccountSettings from 'components/sms/AccountSettings';
 import AccountBilling from 'components/sms/AccountBilling';
-import ApiKeys from 'components/sms/ApiKeys';
 import AccountOverview from 'components/sms/AccountOverview';
 import UserList from 'components/sms/users/UserList';
 import RoleList from 'components/sms/roles/RoleList';
@@ -235,6 +231,8 @@ import PrivateChat from 'components/sms/PrivateChat';
 import InboxMessages from 'components/sms/InboxMessages';
 import FaqExtended from 'components/sms/FaqExtended';
 import AuditLogs from 'components/sms/AuditLogs';
+import NewsList from 'components/sms/NewsList';
+import IpManagement from 'components/sms/IpManagement';
 import InputMaskExample from 'components/doc-components/InputMaskExample';
 import RangeSlider from 'components/doc-components/RangeSlider';
 import VerticalNavLayout from 'layouts/VerticalNavLayout';
@@ -243,10 +241,12 @@ import ComboNavLayout from 'layouts/ComboNavLayout';
 import DoubleTopNavLayout from 'layouts/DoubleTopNavLayout';
 import FalconLoader from 'components/common/FalconLoader';
 import RequireAuth from 'components/authentication/RequireAuth';
+import RequireRole from 'components/authentication/RequireRole';
 
 const routes = [
   {
     element: <App />,
+    errorElement: <Error500 />,
     children: [
       {
         path: 'landing',
@@ -257,8 +257,7 @@ const routes = [
         )
       },
       {
-        path: rootPaths.errorsRoot,
-        element: <ErrorLayout />,
+        element: <ErrorLayout />, 
         children: [
           {
             path: paths.error404,
@@ -377,19 +376,15 @@ const routes = [
       },
       {
         path: paths.simpleLogin,
-        element: <AuthSimpleLayout />,
-        children: [
-          {
-            index: true,
-            element: <SimpleLogin />
-          }
-        ]
+        element: <SplitLogin />
       },
       {
         path: '/',
         element: (
           <RequireAuth>
-            <MainLayout />
+            <RequireRole roles={['PLATFORM_ADMIN', 'COMPANY_ADMIN', 'COMPANY_USER', 'CLIENT_ADMIN', 'CLIENT_USER', 'CLIENT_FINANCE']}>
+              <MainLayout />
+            </RequireRole>
           </RequireAuth>
         ),
         children: [
@@ -430,8 +425,16 @@ const routes = [
             path: rootPaths.smsRoot,
             children: [
               {
+                path: 'ip-management',
+                element: (
+                  <RequireRole roles={['PLATFORM_ADMIN']}>
+                    <IpManagement />
+                  </RequireRole>
+                )
+              },
+              {
                 path: 'dashboard',
-                element: <SmsDashboard />
+                element: <Navigate to={rootPaths.root} replace />
               },
               // Domain
               {
@@ -461,6 +464,11 @@ const routes = [
                 path: 'companies/list',
                 element: <CompaniesList />
               },
+              // Clients
+              {
+                path: 'clients/list',
+                element: <ClientsList />
+              },
               // Accounting
               {
                 path: 'accounting/audit-logs',
@@ -477,7 +485,7 @@ const routes = [
               },
               {
                 path: 'account/apikeys',
-                element: <ApiKeys />
+                element: <AuditLogs />
               },
               {
                 path: 'account/overview',
@@ -519,7 +527,11 @@ const routes = [
               // Rate Card (add on list page)
               {
                 path: 'ratecard/numbers',
-                element: <RateCardNumbers />
+                element: (
+                  <RequireRole roles={['CLIENT_ADMIN', 'CLIENT_USER', 'CLIENT_FINANCE']}>
+                    <RateCardNumbers />
+                  </RequireRole>
+                )
               },
               {
                 path: 'ratecard/new',
@@ -528,61 +540,117 @@ const routes = [
               // SMS Test Panel
               {
                 path: 'test/list-numbers',
-                element: <TestListNumbers />
+                element: (
+                  <RequireRole roles={['COMPANY_ADMIN', 'COMPANY_USER', 'CLIENT_ADMIN', 'CLIENT_USER', 'CLIENT_FINANCE']}>
+                    <TestListNumbers />
+                  </RequireRole>
+                )
               },
               {
                 path: 'test/cdrs',
-                element: <TestCdrs />
+                element: (
+                  <RequireRole roles={['COMPANY_ADMIN', 'COMPANY_USER', 'CLIENT_ADMIN', 'CLIENT_USER', 'CLIENT_FINANCE']}>
+                    <TestCdrs />
+                  </RequireRole>
+                )
               },
               {
                 path: 'test/access-last-hour',
-                element: <AccessListLastHour />
+                element: (
+                  <RequireRole roles={['COMPANY_ADMIN', 'COMPANY_USER', 'CLIENT_ADMIN', 'CLIENT_USER', 'CLIENT_FINANCE']}>
+                    <AccessListLastHour />
+                  </RequireRole>
+                )
               },
               // IPRN SMS
               {
                 path: 'iprn/range-providers',
-                element: <ListProviders />
+                element: (
+                  <RequireRole roles={['PLATFORM_ADMIN', 'COMPANY_ADMIN']}>
+                    <ListProviders />
+                  </RequireRole>
+                )
               },
               {
                 path: 'iprn/create-ranges',
-                element: <CreateRanges />
+                element: (
+                  <RequireRole roles={['PLATFORM_ADMIN', 'COMPANY_ADMIN']}>
+                    <CreateRanges />
+                  </RequireRole>
+                )
               },
               {
                 path: 'iprn/upload-numbers',
-                element: <UploadNumbers />
+                element: (
+                  <RequireRole roles={['PLATFORM_ADMIN', 'COMPANY_ADMIN']}>
+                    <UploadNumbers />
+                  </RequireRole>
+                )
               },
               {
                 path: 'iprn/my-numbers',
-                element: <MyNumbers />
+                element: (
+                  <RequireRole roles={['PLATFORM_ADMIN', 'COMPANY_ADMIN', 'COMPANY_USER']}>
+                    <MyNumbers />
+                  </RequireRole>
+                )
               },
               {
                 path: 'iprn/bulk-allocations',
-                element: <BulkAllocations />
+                element: (
+                  <RequireRole roles={['PLATFORM_ADMIN', 'COMPANY_ADMIN']}>
+                    <BulkAllocations />
+                  </RequireRole>
+                )
               },
               // Statistics
               {
                 path: 'statistics/cdr-reports',
-                element: <CdrReports />
+                element: (
+                  <RequireRole roles={['PLATFORM_ADMIN', 'COMPANY_ADMIN', 'CLIENT_ADMIN', 'CLIENT_USER', 'CLIENT_FINANCE']}>
+                    <CdrReports />
+                  </RequireRole>
+                )
               },
               {
                 path: 'statistics/client-stats',
-                element: <ClientStats />
+                element: (
+                  <RequireRole roles={['PLATFORM_ADMIN', 'COMPANY_ADMIN']}>
+                    <ClientStats />
+                  </RequireRole>
+                )
               },
               {
                 path: 'statistics/provider-stats',
-                element: <ProviderStats />
+                element: (
+                  <RequireRole roles={['PLATFORM_ADMIN', 'COMPANY_ADMIN']}>
+                    <ProviderStats />
+                  </RequireRole>
+                )
               },
               {
                 path: 'statistics/range-stats',
-                element: <RangeStats />
+                element: (
+                  <RequireRole roles={['PLATFORM_ADMIN', 'COMPANY_ADMIN']}>
+                    <RangeStats />
+                  </RequireRole>
+                )
               },
               {
                 path: 'statistics/number-stats',
-                element: <NumberStats />
+                element: (
+                  <RequireRole roles={['PLATFORM_ADMIN', 'COMPANY_ADMIN']}>
+                    <NumberStats />
+                  </RequireRole>
+                )
               },
               {
                 path: 'statistics/failed',
-                element: <FailedMessages />
+                element: (
+                  <RequireRole roles={['PLATFORM_ADMIN', 'COMPANY_ADMIN', 'CLIENT_ADMIN', 'CLIENT_USER', 'CLIENT_FINANCE']}>
+                    <FailedMessages />
+                  </RequireRole>
+                )
               },
               // OSS
               {
@@ -602,11 +670,19 @@ const routes = [
               // Payment Requests
               {
                 path: 'payment/bills',
-                element: <Bills />
+                element: (
+                  <RequireRole roles={['PLATFORM_ADMIN', 'COMPANY_ADMIN']}>
+                    <Bills />
+                  </RequireRole>
+                )
               },
               {
                 path: 'payment/requests',
-                element: <PaymentRequests />
+                element: (
+                  <RequireRole roles={['PLATFORM_ADMIN', 'COMPANY_ADMIN']}>
+                    <PaymentRequests />
+                  </RequireRole>
+                )
               },
               {
                 path: 'payment/admin-requests',
@@ -614,11 +690,24 @@ const routes = [
               },
               {
                 path: 'payment/currencies',
-                element: <PaymentCurrencies />
+                element: (
+                  <RequireRole roles={['PLATFORM_ADMIN']}>
+                    <PaymentCurrencies />
+                  </RequireRole>
+                )
               },
               {
                 path: 'payment/subscriptions',
-                element: <Subscriptions />
+                element: (
+                  <RequireRole roles={['PLATFORM_ADMIN']}>
+                    <Subscriptions />
+                  </RequireRole>
+                )
+              },
+              // News
+              {
+                path: 'news',
+                element: <NewsList />
               },
               // Chat & Support
               {

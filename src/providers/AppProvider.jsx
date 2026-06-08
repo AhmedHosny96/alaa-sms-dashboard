@@ -1,10 +1,41 @@
-import React, { createContext, use, useEffect, useReducer } from 'react';
+import React, {
+  createContext,
+  use,
+  useEffect,
+  useReducer,
+  useState,
+  useCallback
+} from 'react';
 import { settings } from 'config';
 import { getColor, getItemFromStore } from 'helpers/utils';
 import useToggleStyle from 'hooks/useToggleStyle';
 import { configReducer } from 'reducers/configReducer';
+import companyService from 'services/companyService';
+import {
+  getDefaultCompanyTheme,
+  saveCompaniesToStorage
+} from 'helpers/companyTheme';
 
 export const AppContext = createContext(settings);
+
+const getHostname = () =>
+  typeof window !== 'undefined' ? window.location.hostname : '';
+
+const isRealDomain = host =>
+  host &&
+  host !== 'localhost' &&
+  host !== '127.0.0.1' &&
+  !/^\d{1,3}(\.\d{1,3}){3}$/.test(host);
+
+const normalizeBranding = (company = {}) => ({
+  ...getDefaultCompanyTheme(),
+  ...(company || {}),
+  name: company?.name || getDefaultCompanyTheme().name,
+  logoUrl: company?.logoUrl || '',
+  loginBackgroundUrl: company?.loginBackgroundUrl || '',
+  loginFooter: company?.loginFooter || '',
+  domain: company?.domain || ''
+});
 
 const AppProvider = ({ children }) => {
   const configState = {
@@ -18,7 +49,7 @@ const AppProvider = ({ children }) => {
       'isNavbarVerticalCollapsed',
       settings.isNavbarVerticalCollapsed
     ),
-    navbarStyle: getItemFromStore('navbarStyle', settings.navbarStyle),
+    navbarStyle: 'inverted',
     currency: settings.currency,
     showBurgerMenu: settings.showBurgerMenu,
     showSettingPanel: false,
@@ -27,6 +58,7 @@ const AppProvider = ({ children }) => {
   };
 
   const [config, configDispatch] = useReducer(configReducer, configState);
+  const [branding, setBranding] = useState(() => normalizeBranding(getDefaultCompanyTheme()));
 
   const setConfig = (key, value) => {
     configDispatch({
@@ -40,8 +72,7 @@ const AppProvider = ({ children }) => {
           'isDark',
           'theme',
           'navbarPosition',
-          'isNavbarVerticalCollapsed',
-          'navbarStyle'
+          'isNavbarVerticalCollapsed'
         ].includes(key)
       }
     });
@@ -74,6 +105,36 @@ const AppProvider = ({ children }) => {
 
   const getThemeColor = name => getColor(name);
 
+  const refreshBranding = useCallback(async () => {
+    const hostname = getHostname();
+    if (!hostname || !isRealDomain(hostname)) {
+      setBranding(normalizeBranding(getDefaultCompanyTheme()));
+      return;
+    }
+
+    try {
+      const company = await companyService.getByDomain(hostname);
+      if (company && typeof company === 'object') {
+        saveCompaniesToStorage([company]);
+        setBranding(normalizeBranding(company));
+      } else {
+        setBranding(normalizeBranding(getDefaultCompanyTheme()));
+      }
+    } catch (error) {
+      setBranding(normalizeBranding(getDefaultCompanyTheme()));
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshBranding();
+  }, [refreshBranding]);
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.title = branding?.name || getDefaultCompanyTheme().name;
+    }
+  }, [branding]);
+
   if (!isLoaded) {
     return (
       <div
@@ -93,7 +154,15 @@ const AppProvider = ({ children }) => {
 
   return (
     <AppContext
-      value={{ config, setConfig, configDispatch, changeTheme, getThemeColor }}
+      value={{
+        config,
+        setConfig,
+        configDispatch,
+        changeTheme,
+        getThemeColor,
+        branding,
+        refreshBranding
+      }}
     >
       {children}
     </AppContext>

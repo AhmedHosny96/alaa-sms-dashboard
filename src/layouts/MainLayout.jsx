@@ -36,7 +36,7 @@ const MainLayout = () => {
   }, [pathname]);
 
   return (
-    <div className={isFluid ? 'container-fluid' : 'container'}>
+    <div className={(isFluid || navbarPosition === 'vertical' || navbarPosition === 'combo') ? 'container-fluid' : 'container'}>
       {(navbarPosition === 'vertical' || navbarPosition === 'combo') && (
         <NavbarVertical />
       )}

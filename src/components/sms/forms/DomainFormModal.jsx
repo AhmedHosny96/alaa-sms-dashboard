@@ -1,30 +1,21 @@
 import React, { useEffect, useMemo } from 'react';
-import { Button } from 'react-bootstrap';
 import { UseModal, useForm, Forms, UseInput, UseSelect } from 'components/common/UseTable';
+import IconButton from 'components/common/IconButton';
 
-const DomainFormModal = ({ show, onClose, onSubmit, record }) => {
-  const companyOptions = [
-    { id: 'Company A', name: 'Company A' },
-    { id: 'Company B', name: 'Company B' }
-  ];
-  const typeOptions = [
-    { id: 'Primary', name: 'Primary' },
-    { id: 'Secondary', name: 'Secondary' }
-  ];
+const statusOptions = [
+  { id: 'PENDING_DNS', name: 'Pending DNS' },
+  { id: 'ACTIVE', name: 'Active' },
+  { id: 'DISABLED', name: 'Disabled' }
+];
 
-  const statusOptions = [
-    { id: 'Active', name: 'Active' },
-    { id: 'Inactive', name: 'Inactive' }
-  ];
-
+const DomainFormModal = ({ show, onClose, onSubmit, record, submitting = false, companyId, companyName, companies = [] }) => {
   const initialValues = useMemo(
     () => ({
-      company: record?.company ?? '',
       domain: record?.domain ?? '',
-      type: record?.type ?? 'Primary',
-      status: record?.status ?? 'Active'
+      status: record?.status ?? 'PENDING_DNS',
+      companyId: companyId || ''
     }),
-    [record]
+    [record, companyId]
   );
 
   const { values, setValues, handleOnChange } = useForm(initialValues);
@@ -35,49 +26,56 @@ const DomainFormModal = ({ show, onClose, onSubmit, record }) => {
 
   const handleSubmit = () => {
     onSubmit?.(values);
-    onClose?.();
   };
+
+  const isEdit = !!record?.id;
 
   return (
     <UseModal
-      title={record ? 'Edit Domain' : 'Add New Domain'}
+      title={isEdit ? 'Edit Domain' : 'Add Domain'}
       isVisible={show}
       setIsVisible={() => {}}
       onCancel={onClose}
       footer={[
-        <Button key="cancel" variant="secondary" size="sm" onClick={onClose}>
+        <IconButton key="cancel" variant="falcon-default" size="sm" onClick={onClose}>
           Cancel
-        </Button>,
-        <Button key="submit" variant="primary" size="sm" type="submit" form="domain-form">
-          {record ? 'Update' : 'Add'}
-        </Button>
+        </IconButton>,
+        <IconButton
+          key="submit"
+          variant="primary"
+          size="sm"
+          title={isEdit ? 'Update' : 'Add'}
+          type="submit"
+          form="domain-form"
+          disabled={submitting}
+        >
+          {submitting ? 'Saving...' : isEdit ? 'Update' : 'Add'}
+        </IconButton>
       ]}
     >
       <Forms id="domain-form" onFinish={handleSubmit}>
-        <UseSelect
-          name="company"
-          label="Company"
-          value={values.company}
-          options={companyOptions}
-          onChange={(value) => setValues((prev) => ({ ...prev, company: value }))}
-          placeholder="Select company"
-        />
+        {!isEdit && (
+          <UseSelect
+            name="companyId"
+            label="Company"
+            value={values.companyId}
+            options={companies.map((c) => ({ id: c.id, name: c.name }))}
+            onChange={(value) => setValues((prev) => ({ ...prev, companyId: value }))}
+            placeholder="Select company"
+            className="table-select-filter"
+          />
+        )}
         <UseInput
           name="domain"
           label="Domain Name"
           value={values.domain}
           onChange={handleOnChange}
           placeholder="example.com"
+          size="small"
+          className="shadow-none border-300"
+          readOnly={isEdit}
         />
-        <UseSelect
-          name="type"
-          label="Domain Type"
-          value={values.type}
-          options={typeOptions}
-          onChange={(value) => setValues((prev) => ({ ...prev, type: value }))}
-          placeholder="Select domain type"
-        />
-        {record && (
+        {isEdit && (
           <UseSelect
             name="status"
             label="Status"
@@ -85,6 +83,7 @@ const DomainFormModal = ({ show, onClose, onSubmit, record }) => {
             options={statusOptions}
             onChange={(value) => setValues((prev) => ({ ...prev, status: value }))}
             placeholder="Select status"
+            className="table-select-filter"
           />
         )}
       </Forms>

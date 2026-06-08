@@ -7,7 +7,7 @@ import { Outlet } from 'react-router';
 
 const VerticalNavLayout = () => {
   return (
-    <div className="container">
+    <div className="container-fluid px-0">
       <NavbarVertical />
       <ProductProvider>
         <div className="content">

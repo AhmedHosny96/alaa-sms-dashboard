@@ -1,3 +1,4 @@
+
 export const rootPaths = {
   root: '/',
   dashboardRoot: 'dashboard',
@@ -39,6 +40,9 @@ export const rootPaths = {
 };
 
 export default {
+    smsIpManagement: `/${rootPaths.smsRoot}/ip-management`,
+  // Clients
+  smsClientsList: `/${rootPaths.smsRoot}/clients/list`,
   changelog: '/changelog',
   migration: '/migration',
   widgets: '/widgets',
@@ -232,6 +236,8 @@ export default {
   smsSubscriptions: `/${rootPaths.smsRoot}/payment/subscriptions`,
   // Accounting
   smsAuditLogs: `/${rootPaths.smsRoot}/accounting/audit-logs`,
+  // News
+  smsNews: `/${rootPaths.smsRoot}/news`,
   // Chat & Support
   smsPrivateChat: `/${rootPaths.smsRoot}/chat/private`,
   smsInboxMessages: `/${rootPaths.smsRoot}/inbox/messages`,

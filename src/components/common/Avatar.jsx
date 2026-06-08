@@ -42,7 +42,7 @@ const Avatar = ({
     if (name) {
       return (
         <div className={`avatar-name ${mediaClasses}`}>
-          <span>{isExact ? name : name.match(/\b\w/g).join('')}</span>
+          <span>{isExact ? name : (name.match(/\b\w/g) || []).join('')}</span>
         </div>
       );
     }

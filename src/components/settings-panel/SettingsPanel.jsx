@@ -237,17 +237,6 @@ const SettingsPanel = () => {
         <hr />
         <div className="text-center mt-5">
           <img src={settings} alt="settings" width={120} className="mb-4" />
-          <h5>Like What You See?</h5>
-          <p className="fs-10">
-            Get Falcon now and create beautiful dashboards with hundreds of
-            widgets.
-          </p>
-          <Button
-            color="primary"
-            href="https://themewagon.com/themes/falcon-react/"
-          >
-            Purchase
-          </Button>
         </div>
       </Offcanvas.Body>
       {/* </ScrollBarCustom> */}

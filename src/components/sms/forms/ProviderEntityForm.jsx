@@ -3,6 +3,7 @@ import { Button, Card, Col, Form, Row } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useForm, Forms, UseInput, UseSelect } from 'components/common/UseTable';
 import { isValidIPv4ClassABC } from 'helpers/utils';
+import { SMPP_BIND_MODE_OPTIONS, canonicalSmppBindMode } from 'constants/smppBindMode';
 
 const EntityForm = ({ record, onSubmit, onCancel }) => {
   const initialProviderValues = useMemo(
@@ -17,7 +18,7 @@ const EntityForm = ({ record, onSubmit, onCancel }) => {
       smppPort: record?.smppPort ?? '',
       smppSystemId: record?.smppSystemId ?? '',
       smppPassword: record?.smppPassword ?? '',
-      smppBindMode: record?.smppBindMode ?? ''
+      smppBindMode: canonicalSmppBindMode(record?.smppBindMode)
     }),
     [record]
   );
@@ -59,12 +60,6 @@ const EntityForm = ({ record, onSubmit, onCancel }) => {
   const removeProviderIp = (ip) => {
     setProviderIpList((prev) => prev.filter((x) => x !== ip));
   };
-
-  const bindModeOptions = [
-    { id: 'tx', name: 'TX (Transmitter)' },
-    { id: 'rx', name: 'RX (Receiver)' },
-    { id: 'trx', name: 'TRX (Transceiver)' }
-  ];
 
   const handleProviderSubmit = () => {
     const payload = { ...values, ipAddresses: providerIpList.join('\n') };
@@ -240,7 +235,7 @@ const EntityForm = ({ record, onSubmit, onCancel }) => {
                 name="smppBindMode"
                 label="Bind Mode"
                 value={values.smppBindMode}
-                options={bindModeOptions}
+                options={SMPP_BIND_MODE_OPTIONS}
                 onChange={(v) => setValues((prev) => ({ ...prev, smppBindMode: v }))}
                 placeholder="Please Select"
               />

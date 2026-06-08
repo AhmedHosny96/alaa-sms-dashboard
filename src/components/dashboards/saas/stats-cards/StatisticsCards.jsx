@@ -1,13 +1,13 @@
 import React from 'react';
 import { Col, Row } from 'react-bootstrap';
 import StatisticsCard from './StatisticsCard';
-import { statsData } from 'data/dashboard/saas';
 
-const StatisticsCards = () => {
+const StatisticsCards = ({ stats }) => {
+  if (!stats?.length) return null;
   return (
     <Row className="g-3 mb-3">
-      {statsData.map((stat, index) => (
-        <Col key={stat.title} sm={index === 2 ? 12 : 6} md={4}>
+      {stats.map((stat) => (
+        <Col key={stat.title} sm={6} md={4}>
           <StatisticsCard stat={stat} style={{ minWidth: '12rem' }} />
         </Col>
       ))}

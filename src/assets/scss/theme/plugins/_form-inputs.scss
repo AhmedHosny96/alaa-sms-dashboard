@@ -1,0 +1,158 @@
+// Align Bootstrap form inputs with the look of SearchSelect / TableSelectFilter.
+// Uses the same tokens, radius, focus glow, and size scale so a row mixing
+// <Form.Control>, <Form.Select>, react-datepicker, and SearchSelect reads as one
+// family. Scoped to `.form-control` / `.form-select` and input-group siblings so
+// it does not touch SearchSelect's own `.search-select__*` rules or
+// `.form-check-input` (checkboxes / switches keep their native shape).
+
+%input-shared-surface {
+  background-color: var(--#{$prefix}quaternary-bg);
+  border: 1px solid var(--#{$prefix}border-color);
+  border-radius: 6px;
+  box-shadow: none;
+  color: var(--#{$prefix}body-color);
+  transition: border-color 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+}
+
+%input-shared-hover {
+  border-color: var(--#{$prefix}gray-400);
+}
+
+%input-shared-focus {
+  background-color: var(--#{$prefix}quaternary-bg);
+  border-color: var(--#{$prefix}primary);
+  box-shadow: 0 0 0 2px rgba(var(--#{$prefix}primary-rgb), 0.15);
+  outline: none;
+}
+
+%input-shared-disabled {
+  background-color: var(--#{$prefix}gray-100);
+  color: var(--#{$prefix}gray-600);
+  cursor: not-allowed;
+}
+
+.form-control:not(.form-control-plaintext),
+.form-select {
+  @extend %input-shared-surface;
+  font-size: 0.875rem;
+  min-height: 38px;
+
+  &:hover:not(:disabled):not([readonly]):not(.is-invalid):not(.is-valid) {
+    @extend %input-shared-hover;
+  }
+
+  &:focus,
+  &:focus-visible {
+    @extend %input-shared-focus;
+  }
+
+  &:disabled,
+  &[readonly] {
+    @extend %input-shared-disabled;
+  }
+}
+
+// Size variants — match SearchSelect --sm (31px) / --md (38px default).
+.form-control-sm,
+.form-select-sm {
+  min-height: 31px;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.form-control-lg,
+.form-select-lg {
+  min-height: 46px;
+  font-size: 1rem;
+}
+
+// Validation states — softer halo matching SearchSelect's invalid variant.
+.form-control.is-invalid,
+.form-select.is-invalid,
+.was-validated .form-control:invalid,
+.was-validated .form-select:invalid {
+  border-color: var(--#{$prefix}danger);
+
+  &:focus {
+    border-color: var(--#{$prefix}danger);
+    box-shadow: 0 0 0 2px rgba(var(--#{$prefix}danger-rgb), 0.15);
+  }
+}
+
+.form-control.is-valid,
+.form-select.is-valid,
+.was-validated .form-control:valid,
+.was-validated .form-select:valid {
+  border-color: var(--#{$prefix}success);
+
+  &:focus {
+    border-color: var(--#{$prefix}success);
+    box-shadow: 0 0 0 2px rgba(var(--#{$prefix}success-rgb), 0.15);
+  }
+}
+
+// Placeholders consistent with SearchSelect's muted gray.
+.form-control::placeholder,
+.form-select::placeholder {
+  color: var(--#{$prefix}gray-500);
+  opacity: 1;
+}
+
+// Input groups: keep the addon buttons / text in lock-step with the input edge
+// so the joined control reads as one rounded pill.
+.input-group {
+  > .form-control,
+  > .form-select,
+  > .input-group-text,
+  > .btn {
+    border-color: var(--#{$prefix}border-color);
+  }
+
+  > .input-group-text {
+    background-color: var(--#{$prefix}quaternary-bg);
+    color: var(--#{$prefix}gray-600);
+    font-size: 0.8125rem;
+  }
+
+  // When any child is focused, lift the whole group's border to primary so
+  // the focus ring reads on the boundary rather than the inner input alone.
+  &:focus-within {
+    > .form-control,
+    > .form-select,
+    > .input-group-text,
+    > .btn:not(.btn-primary):not(.btn-success):not(.btn-danger):not(.btn-warning):not(.btn-info) {
+      border-color: var(--#{$prefix}primary);
+    }
+  }
+}
+
+// React-datepicker's bare input — same surface so it doesn't read as a
+// different control in CDR / OSS toolbars.
+.react-datepicker__input-container > input {
+  @extend %input-shared-surface;
+  font-size: 0.8125rem;
+  min-height: 31px;
+  padding: 0.25rem 0.6rem;
+
+  &:hover:not(:disabled):not([readonly]) {
+    @extend %input-shared-hover;
+  }
+
+  &:focus,
+  &:focus-visible {
+    @extend %input-shared-focus;
+  }
+}
+
+// Floating label inputs — keep the surface, slightly taller for the label.
+.form-floating > .form-control,
+.form-floating > .form-select {
+  min-height: calc(3.5rem + 2px);
+}
+
+// Textarea: surface + radius, but let height come from rows/content.
+textarea.form-control {
+  min-height: 64px;
+}

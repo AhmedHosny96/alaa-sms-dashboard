@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
 import CardDropdown from 'components/common/CardDropdown';
@@ -82,15 +82,22 @@ const getOptions = (getThemeColor, data) => ({
   ]
 });
 
-const BandwidthSaved = ({ bodyClassName }) => {
+const BandwidthSaved = ({
+  bodyClassName,
+  title = 'Bandwidth Saved',
+  gaugeValue,
+  savedLabel,
+  totalLabel
+}) => {
   const { getThemeColor } = useAppContext();
-  const [total] = useState(38.44);
-  const [saved] = useState(35.75);
+  const gauge = gaugeValue != null ? gaugeValue : 93;
+  const saved = savedLabel ?? '35.75 GB saved';
+  const total = totalLabel ?? '38.44 GB total bandwidth';
 
   return (
     <Card className="h-100">
       <FalconCardHeader
-        title="Bandwidth Saved"
+        title={title}
         titleTag="h6"
         className="py-2"
         light
@@ -104,7 +111,7 @@ const BandwidthSaved = ({ bodyClassName }) => {
       >
         <ReactEchart
           echarts={echarts}
-          option={getOptions(getThemeColor, 93)}
+          option={getOptions(getThemeColor, gauge)}
           style={{ height: '10.3rem', widht: '10.3rem' }}
         />
         <div className="text-center mt-3">
@@ -114,9 +121,9 @@ const BandwidthSaved = ({ bodyClassName }) => {
               transform="shrink-2"
               className="text-success me-1"
             />
-            {saved} GB saved
+            {saved}
           </h6>
-          <p className="fs-10 mb-0">{total} GB total bandwidth</p>
+          <p className="fs-10 mb-0">{total}</p>
         </div>
       </Card.Body>
       <Card.Footer className="bg-body-tertiary py-2">

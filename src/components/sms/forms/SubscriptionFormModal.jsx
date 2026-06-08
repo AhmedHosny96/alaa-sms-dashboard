@@ -1,19 +1,41 @@
 import React, { useEffect, useMemo } from 'react';
-import { Button } from 'react-bootstrap';
 import { UseModal, useForm, Forms, UseInput, UseSelect } from 'components/common/UseTable';
+import IconButton from 'components/common/IconButton';
 
-const SubscriptionFormModal = ({ show, onClose, onSubmit, record }) => {
+const normalizeStatus = (status) => {
+  const raw = String(status || '').trim().toLowerCase();
+  if (raw === 'active') return 'Active';
+  if (raw === 'inactive') return 'Inactive';
+  return 'Active';
+};
+
+const SubscriptionFormModal = ({ show, onClose, onSubmit, record, submitting = false }) => {
   const statusOptions = [
     { id: 'Active', name: 'Active' },
     { id: 'Inactive', name: 'Inactive' }
   ];
 
+  const billingCycleOptions = [
+    { id: 'MONTHLY', name: 'Monthly' },
+    { id: 'YEARLY', name: 'Yearly' }
+  ];
+
+  const currencyOptions = [
+    { id: 'USD', name: 'USD' },
+    { id: 'EUR', name: 'EUR' },
+    { id: 'GBP', name: 'GBP' }
+  ];
+
   const initialValues = useMemo(
     () => ({
+      code: record?.code ?? '',
       name: record?.name ?? '',
-      price: record?.price ?? '',
-      tps: record?.tps ?? '',
-      status: record?.status ?? 'Active'
+      description: record?.description ?? '',
+      priceMonthly: record?.priceMonthly ?? '',
+      tpsLimit: record?.tpsLimit ?? '',
+      currency: record?.currency ?? 'USD',
+      billingCycle: record?.billingCycle ?? 'MONTHLY',
+      status: normalizeStatus(record?.status)
     }),
     [record]
   );
@@ -26,7 +48,6 @@ const SubscriptionFormModal = ({ show, onClose, onSubmit, record }) => {
 
   const handleSubmit = () => {
     onSubmit?.(values);
-    onClose?.();
   };
 
   return (
@@ -36,15 +57,30 @@ const SubscriptionFormModal = ({ show, onClose, onSubmit, record }) => {
       setIsVisible={() => {}}
       onCancel={onClose}
       footer={[
-        <Button key="cancel" variant="secondary" size="sm" onClick={onClose}>
+        <IconButton key="cancel" variant="falcon-default" size="sm" onClick={onClose}>
           Cancel
-        </Button>,
-        <Button key="submit" variant="primary" size="sm" type="submit" form="subscription-form">
+        </IconButton>,
+        <IconButton
+          key="submit"
+          variant="primary"
+          size="sm"
+          type="submit"
+          form="subscription-form"
+          disabled={submitting}
+        >
           {record ? 'Update' : 'Create'}
-        </Button>
+        </IconButton>
       ]}
     >
       <Forms id="subscription-form" onFinish={handleSubmit}>
+        <UseInput
+          name="code"
+          label="Code"
+          value={values.code}
+          onChange={handleOnChange}
+          placeholder="STARTER"
+          disabled={!!record?.id}
+        />
         <UseInput
           name="name"
           label="Plan Name"
@@ -53,20 +89,44 @@ const SubscriptionFormModal = ({ show, onClose, onSubmit, record }) => {
           placeholder="Starter"
         />
         <UseInput
-          name="price"
-          label="Monthly Price (USD)"
+          name="description"
+          label="Description"
+          value={values.description}
+          onChange={handleOnChange}
+          placeholder="Entry tier"
+        />
+        <UseInput
+          name="priceMonthly"
+          label="Monthly Price"
           type="number"
-          value={values.price}
+          step="0.01"
+          value={values.priceMonthly}
           onChange={handleOnChange}
           placeholder="200"
         />
         <UseInput
-          name="tps"
+          name="tpsLimit"
           label="TPS Limit"
           type="number"
-          value={values.tps}
+          value={values.tpsLimit}
           onChange={handleOnChange}
           placeholder="20"
+        />
+        <UseSelect
+          name="currency"
+          label="Currency"
+          value={values.currency}
+          options={currencyOptions}
+          onChange={(v) => setValues((prev) => ({ ...prev, currency: v }))}
+          placeholder="Select currency"
+        />
+        <UseSelect
+          name="billingCycle"
+          label="Billing Cycle"
+          value={values.billingCycle}
+          options={billingCycleOptions}
+          onChange={(v) => setValues((prev) => ({ ...prev, billingCycle: v }))}
+          placeholder="Select cycle"
         />
         {record && (
           <UseSelect

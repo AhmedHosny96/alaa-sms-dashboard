@@ -25,8 +25,8 @@ const tooltipFormatter = params => {
     .map(
       ({ value, borderColor }, index) =>
         `<div class="dot me-1 fs-11 d-inline-block" style="background-color: ${borderColor}"></div>
-              <span class='text-600'>${index === 0 ? 'Last Month' : 'Previous Year'
-        }: ${value}</span>`
+              <span class='text-600'>${index === 0 ? 'This Week' : 'Last Week'
+        }: ${value} SMS</span>`
     )
     .join('<br/>');
 };
@@ -49,7 +49,10 @@ const getOptions = (getThemeColor, data) => ({
   },
   xAxis: {
     type: 'category',
-    data: getPastDates(12),
+    data:
+      Array.isArray(data?.labels) && data.labels.length
+        ? data.labels
+        : getPastDates(Math.max(7, (data?.lastMonth || []).length || 12)),
     boundaryGap: 0,
     axisPointer: {
       lineStyle: {
@@ -68,7 +71,13 @@ const getOptions = (getThemeColor, data) => ({
     axisLabel: {
       color: getThemeColor('gray-400'),
       margin: 15,
-      formatter: value => dayjs(value).format('MMM DD')
+      // Backend labels (e.g. "Mon 4 May") are already formatted; only date strings
+      // need the dayjs format pass.
+      formatter: value => {
+        if (!value || /[A-Za-z]/.test(value)) return value;
+        const d = dayjs(value);
+        return d.isValid() ? d.format('MMM DD') : value;
+      }
     }
   },
   yAxis: {

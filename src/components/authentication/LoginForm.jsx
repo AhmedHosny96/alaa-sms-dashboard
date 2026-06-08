@@ -1,12 +1,10 @@
-import Divider from 'components/common/Divider';
 import { useState } from 'react';
 import { Button, Col, Form, Row, InputGroup } from 'react-bootstrap';
 import { Link, useLocation, useNavigate } from 'react-router';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { toast } from 'react-toastify';
-import SocialAuthButtons from './SocialAuthButtons';
 import paths from 'routes/paths';
-import { setAuthUser } from './authStorage';
+import authService from 'services/authService';
 
 const forgotPasswordPaths = {
   simple: paths.simpleForgotPassword,
@@ -14,7 +12,13 @@ const forgotPasswordPaths = {
   card: paths.cardForgotPassword
 };
 
-const LoginForm = ({ hasLabel = false, layout = 'simple' }) => {
+const createCaptcha = () => {
+  const a = Math.floor(Math.random() * 9) + 1;
+  const b = Math.floor(Math.random() * 9) + 1;
+  return { a, b, answer: a + b };
+};
+
+const LoginForm = ({ hasLabel = false, layout = 'simple', showCaptcha = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || '/';
@@ -25,32 +29,51 @@ const LoginForm = ({ hasLabel = false, layout = 'simple' }) => {
     remember: false
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [captcha, setCaptcha] = useState(() => createCaptcha());
+  const [captchaAnswer, setCaptchaAnswer] = useState('');
 
   // Handler
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
+    if (showCaptcha) {
+      const numericAnswer = Number(captchaAnswer);
+      if (!Number.isFinite(numericAnswer) || numericAnswer !== captcha.answer) {
+        toast.error(
+          <div className="py-2 flex-1">
+            Invalid captcha answer
+          </div>,
+          { theme: 'colored' }
+        );
+        setCaptcha(createCaptcha());
+        setCaptchaAnswer('');
+        return;
+      }
+    }
     const email = formData.email.trim();
     const password = formData.password;
-    const isValid = email === 'test@exampl.com' && password === 'password123';
 
-    if (!isValid) {
+    try {
+      await authService.login({
+        email,
+        password,
+        remember: formData.remember
+      });
+
+      toast.success(
+        <div className="py-2 flex-1">
+          Logged in as {email}
+        </div>,
+        { theme: 'colored' }
+      );
+      navigate(from, { replace: true });
+    } catch (error) {
       toast.error(
         <div className="py-2 flex-1">
           Invalid email or password
         </div>,
         { theme: 'colored' }
       );
-      return;
     }
-
-    setAuthUser({ email }, formData.remember);
-    toast.success(
-      <div className='py-2 flex-1'>
-        Logged in as {email}
-      </div>,
-      { theme: 'colored' }
-    );
-    navigate(from, { replace: true });
   };
 
   const handleFieldChange = e => {
@@ -97,6 +120,22 @@ const LoginForm = ({ hasLabel = false, layout = 'simple' }) => {
         </InputGroup>
       </Form.Group>
 
+      {showCaptcha && (
+        <>
+          <Form.Group className="mb-2">
+            <Form.Label>
+              What is {captcha.a} + {captcha.b} = ?
+            </Form.Label>
+            <Form.Control
+              type="number"
+              inputMode="numeric"
+              value={captchaAnswer}
+              onChange={(e) => setCaptchaAnswer(e.target.value)}
+            />
+          </Form.Group>
+        </>
+      )}
+
       <Row className="justify-content-between align-items-center">
         <Col xs="auto">
           <Form.Check type="checkbox" id="rememberMe" className="mb-0">
@@ -135,9 +174,6 @@ const LoginForm = ({ hasLabel = false, layout = 'simple' }) => {
         </Button>
       </Form.Group>
 
-      <Divider className="mt-4">or log in with</Divider>
-
-      <SocialAuthButtons />
     </Form>
   );
 };

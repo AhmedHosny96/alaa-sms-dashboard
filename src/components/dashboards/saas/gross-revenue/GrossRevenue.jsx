@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Card, Col, Form, Row, Table, Button } from 'react-bootstrap';
+import { Card, Col, Form, Row, Button } from 'react-bootstrap';
 import Flex from 'components/common/Flex';
 import SubtleBadge from 'components/common/SubtleBadge';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -25,7 +25,7 @@ const months = [
 const grossTableRows = [
   {
     id: 1,
-    title: 'Point of sale',
+    title: 'Platform Traffic',
     revenue: '$791.64',
     marketValue: {
       up: false,
@@ -34,7 +34,7 @@ const grossTableRows = [
   },
   {
     id: 2,
-    title: 'Online Store',
+    title: 'Client Traffic',
     revenue: '$113.86',
     marketValue: {
       up: true,
@@ -43,7 +43,7 @@ const grossTableRows = [
   },
   {
     id: 3,
-    title: 'Online Store',
+    title: 'Failed Traffic',
     revenue: '$0.00',
     marketValue: {
       up: false,
@@ -52,17 +52,27 @@ const grossTableRows = [
   }
 ];
 
-const GrossRevenue = ({ data }) => {
-  const [selectedMonth, setSelectedMonth] = useState(months[0]);
-  const [previousMonth, setPreviousMonth] = useState(months[11]);
+const currentMonth = months[new Date().getMonth()];
+const previousMonthOf = (mon) => {
+  const idx = months.indexOf(mon);
+  if (idx < 0) return months[11];
+  return idx === 0 ? months[11] : months[idx - 1];
+};
+
+const GrossRevenue = ({
+  data,
+  title = 'SMS Revenue',
+  grossHeader,
+  tableRows,
+  className
+}) => {
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+  const [previousMonth, setPreviousMonth] = useState(previousMonthOf(currentMonth));
   const chartRef = useRef(null);
 
   useEffect(() => {
     if (selectedMonth) {
-      const monthIndex = months.indexOf(selectedMonth) - 1;
-      const prevMon = monthIndex >= 0 ? months[monthIndex] : months[11];
-
-      setPreviousMonth(prevMon);
+      setPreviousMonth(previousMonthOf(selectedMonth));
     }
   }, [selectedMonth]);
 
@@ -74,25 +84,30 @@ const GrossRevenue = ({ data }) => {
     event.target.closest('button').classList.toggle('opacity-50');
   };
 
+  const primary = grossHeader?.primaryFormatted ?? '$165.50';
+  const changePct = grossHeader?.changePct != null ? String(grossHeader.changePct) : '5%';
+  const changeTrim = changePct.trim();
+  const changeUp = !changeTrim.startsWith('-');
+  const rows = Array.isArray(tableRows) && tableRows.length ? tableRows : grossTableRows;
+
   return (
-    <Card className="h-100">
-      <Card.Header>
-        <Row className="justify-content-between gx-0">
-          <Col xs="auto">
-            <h1 className="fs-9 text-900">Gross revenue</h1>
-            <Flex>
-              <h4 className="text-primary mb-0">$165.50</h4>
-              <div className="ms-3">
-                <SubtleBadge pill bg="primary">
-                  <FontAwesomeIcon icon="caret-up" /> 5%
-                </SubtleBadge>
-              </div>
+    <Card className={classNames('h-100 overflow-hidden', className)}>
+      <Card.Header className="py-2">
+        <Row className="align-items-start justify-content-between g-2 flex-nowrap">
+          <Col className="min-w-0">
+            <h6 className="mb-1 text-900">{title}</h6>
+            <Flex className="align-items-center flex-wrap gap-2">
+              <span className="text-primary fs-5 fw-semibold mb-0">{primary}</span>
+              <SubtleBadge pill bg="primary" className="ms-0">
+                <FontAwesomeIcon icon={changeUp ? 'caret-up' : 'caret-down'} /> {changePct}
+              </SubtleBadge>
             </Flex>
           </Col>
-          <Col xs="auto">
+          <Col xs="auto" className="flex-shrink-0">
             <Form.Select
               size="sm"
               className="pe-4"
+              value={selectedMonth}
               onChange={({ target }) => setSelectedMonth(target.value)}
             >
               {months.map(mon => (
@@ -104,46 +119,47 @@ const GrossRevenue = ({ data }) => {
           </Col>
         </Row>
       </Card.Header>
-      <Card.Body className="pt-0 pb-3 h-100">
-        <div className="mx-ncard">
-          <Table borderless className="font-sans-serif fw-medium fs-10">
-            <tbody>
-              {grossTableRows.map(row => (
-                <tr key={row.id}>
-                  <td className="pb-2 pt-0">{row.title}</td>
-                  <td className="pb-2 pt-0 text-end" style={{ width: '20%' }}>
-                    {row.revenue}
-                  </td>
-                  <td
-                    className="pb-2 pt-0 text-end text-700"
-                    style={{ maxWidth: '20%' }}
-                  >
-                    {row.marketValue.value && (
-                      <FontAwesomeIcon
-                        icon={classNames({
-                          'long-arrow-alt-up': row.marketValue.up,
-                          'long-arrow-alt-down': !row.marketValue.up
-                        })}
-                        className={classNames('me-1', {
-                          'text-success': row.marketValue.up,
-                          'text-danger': !row.marketValue.up
-                        })}
-                      />
-                    )}
-
-                    {row.marketValue.value ? row.marketValue.value : '-'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
+      <Card.Body className="pt-0 pb-2 h-100 d-flex flex-column">
+        <div className="px-0 px-sm-1">
+          {rows.map((row, idx) => (
+            <Row
+              key={row.id}
+              className={classNames(
+                'align-items-center g-1 g-sm-2 fs-10 fw-medium font-sans-serif py-2 mx-0',
+                idx < rows.length - 1 && 'border-bottom border-200'
+              )}
+            >
+              <Col xs={5} className="min-w-0 pe-1">
+                <span className="text-900 text-truncate d-block" title={row.title}>
+                  {row.title}
+                </span>
+              </Col>
+              <Col xs={3} className="text-end text-nowrap ps-0 pe-1">
+                {row.revenue}
+              </Col>
+              <Col xs={4} className="text-end text-700 text-nowrap ps-0">
+                {row.marketValue.value && (
+                  <FontAwesomeIcon
+                    icon={row.marketValue.up ? 'long-arrow-alt-up' : 'long-arrow-alt-down'}
+                    className={classNames('me-1', {
+                      'text-success': row.marketValue.up,
+                      'text-danger': !row.marketValue.up
+                    })}
+                  />
+                )}
+                {row.marketValue.value ? row.marketValue.value : '—'}
+              </Col>
+            </Row>
+          ))}
+        </div>
+        <div className="mt-1 flex-grow-1 w-100" style={{ minWidth: 0 }}>
           <GrossRevenueChart
             ref={chartRef}
             selectedMonth={selectedMonth}
             previousMonth={previousMonth}
             data={data}
-            className="px-3 h-100"
-            style={{ minHeight: '14.375rem' }}
+            className="w-100 h-100"
+            style={{ minHeight: '10rem' }}
           />
         </div>
       </Card.Body>
@@ -171,8 +187,7 @@ const GrossRevenue = ({ data }) => {
             <span className="text">{previousMonth}</span>
           </Button>
         </Flex>
-        <FalconLink title="View report" className="px-0" />
-      </Card.Footer>
+    </Card.Footer>
     </Card>
   );
 };

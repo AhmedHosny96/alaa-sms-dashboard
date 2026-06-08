@@ -1,6 +1,5 @@
 import React from 'react';
-import { Card, Container } from 'react-bootstrap';
-import TableToolbar from 'components/common/TableToolbar';
+import { Card, Col, Container, Row } from 'react-bootstrap';
 import './TablePage.css';
 
 const TablePageLayout = ({
@@ -11,26 +10,38 @@ const TablePageLayout = ({
   children,
   className,
   cardClassName
-}) => (
-  <Container fluid className={className ?? 'py-3'}>
-    <Card className={cardClassName ? `table-page-card ${cardClassName}` : 'table-page-card'}>
-      {(title || subtitle) && (
-        <Card.Header className="d-flex flex-column gap-0 py-2">
-          {title && <Card.Title as="h5" className="mb-0">{title}</Card.Title>}
-          {subtitle && <Card.Text as="span" className="text-700 fs--1 mb-0">{subtitle}</Card.Text>}
-        </Card.Header>
-      )}
-      <Card.Body>
-        {topContent && <div className="mb-3">{topContent}</div>}
-        {toolbar && (
-          <TableToolbar className="table-page-toolbar justify-content-end flex-wrap gap-0">
-            {toolbar}
-          </TableToolbar>
+}) => {
+  const hasToolbar = Boolean(toolbar);
+
+  return (
+    <Container fluid className={className ?? 'py-3'}>
+      <Card className={cardClassName ? `table-page-card ${cardClassName}` : 'table-page-card'}>
+        {(title || subtitle || toolbar) && (
+          <Card.Header className="py-2">
+            <Row className="flex-between-center">
+              <Col xs={hasToolbar ? 4 : 12} sm="auto" className="d-flex align-items-center pe-0">
+                <div className="py-2 py-xl-0">
+                  {title && <h5 className="fs-9 mb-0 text-nowrap">{title}</h5>}
+                  {subtitle && <span className="text-700 fs--1 mb-0 d-block">{subtitle}</span>}
+                </div>
+              </Col>
+              {toolbar && (
+                <Col xs={12} sm="auto" className="ps-0">
+                  <div id="orders-actions" className="table-page-header-actions d-flex align-items-center flex-nowrap">
+                    {toolbar}
+                  </div>
+                </Col>
+              )}
+            </Row>
+          </Card.Header>
         )}
-        <div className="p-0">{children}</div>
-      </Card.Body>
-    </Card>
-  </Container>
-);
+        <Card.Body className="p-0">
+          {topContent && <div className="p-3">{topContent}</div>}
+          <div className="p-0">{children}</div>
+        </Card.Body>
+      </Card>
+    </Container>
+  );
+};
 
 export default TablePageLayout;

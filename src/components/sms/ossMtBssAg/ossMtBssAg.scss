@@ -1,0 +1,314 @@
+.oss-mt-bss-panel-card {
+  border-radius: 4px;
+  border-color: #c8d2dc !important;
+}
+
+.oss-mt-bss-panel-fs {
+  position: fixed;
+  inset: 0;
+  z-index: 1080;
+  margin: 0 !important;
+
+  &.card {
+    border-radius: 0;
+    height: 100vh !important;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-body {
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+
+    .oss-mt-bss-grid {
+      height: 100% !important;
+    }
+
+    > div[class*='ag-theme'] {
+      flex: 1;
+      height: calc(100vh - 120px) !important;
+    }
+  }
+}
+
+body.oss-mt-bss-fs-active {
+  overflow: hidden;
+
+  .navbar-vertical,
+  .navbar-top {
+    display: none !important;
+  }
+
+  .content {
+    margin-left: 0 !important;
+    padding: 0 !important;
+  }
+
+  .oss-mt-bss-panel-card:not(.oss-mt-bss-panel-fs) {
+    display: none !important;
+  }
+}
+
+.oss-mt-bss-collapser {
+  cursor: pointer;
+  user-select: none;
+}
+
+.oss-mt-bss-totals-bar {
+  row-gap: 0.25rem;
+}
+
+.oss-mt-bss-presets-toolbar .btn.falcon-default.active,
+.oss-mt-bss-presets-toolbar .btn.btn-primary {
+  box-shadow: none;
+}
+
+.oss-ag-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: #ffffff;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='%231a1d21'><path d='M3 4.5l3 3 3-3z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 12px;
+  border: 1px solid #dfe3e8;
+  border-radius: 4px;
+  color: #1a1d21;
+  cursor: pointer;
+  font-family: var(--bs-font-sans-serif);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  min-width: 168px;
+  padding: 5px 26px 5px 10px;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+
+  &:hover {
+    border-color: #c4ccd4;
+  }
+
+  &:focus,
+  &:focus-visible {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18);
+    outline: none;
+  }
+
+  &:disabled {
+    background-color: #f4f6f9;
+    color: #8b9199;
+    cursor: not-allowed;
+  }
+}
+
+.oss-mt-bss-report-title {
+  .oss-mt-bss-title-icon {
+    color: var(--bs-gray-700, #616368);
+    font-size: 0.85rem;
+  }
+}
+
+.oss-mt-panel-tools .btn-link {
+  text-decoration: none;
+  color: #5c636a;
+}
+
+.oss-mt-panel-tools .btn-link:hover {
+  color: var(--bs-primary, #3874ff);
+}
+
+.oss-mt-panel-tools .form-check-input:checked {
+  background-color: var(--bs-success, #00965a);
+  border-color: var(--bs-success, #00965a);
+}
+
+/* Funnel filter dropdown — show only the icon, no Bootstrap caret */
+.oss-mt-filter-toggle {
+  &::after {
+    display: none !important;
+  }
+
+  box-shadow: none !important;
+
+  &:focus,
+  &:focus-visible {
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18) !important;
+  }
+}
+
+.oss-mt-filter-menu {
+  min-width: 180px;
+  border-color: #dfe3e8;
+  box-shadow: 0 6px 18px rgba(15, 30, 60, 0.08);
+
+  .dropdown-item {
+    font-size: 12px;
+    padding: 6px 14px;
+
+    &.active,
+    &:active {
+      background-color: #2563eb;
+      color: #ffffff;
+    }
+  }
+}
+
+.oss-mt-bss-grid .ag-header-cell-label {
+  justify-content: center;
+  font-weight: 600;
+}
+
+.oss-mt-bss-grid .oss-ag-header-left .ag-header-cell-label {
+  justify-content: flex-start;
+}
+
+.oss-mt-bss-grid .oss-margin-lead-head .ag-header-cell-label {
+  justify-content: center;
+}
+
+.oss-mt-bss-grid .ag-cell {
+  display: flex;
+  align-items: center;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+.oss-mt-bss-grid .ag-cell-value,
+.oss-mt-bss-grid .ag-cell-wrapper {
+  width: 100%;
+}
+
+.oss-mt-bss-grid .oss-ag-cell-plain-center,
+.oss-mt-bss-grid .oss-ag-cell-plain-center .ag-cell-wrapper {
+  justify-content: center;
+}
+
+.oss-mt-bss-grid .oss-ag-cell-plain-center .ag-cell-value,
+.oss-mt-bss-grid .oss-ag-cell-plain-center .oss-mt-cell-plain {
+  text-align: center;
+  width: 100%;
+}
+
+/* Percent columns — full bleed */
+.oss-mt-bss-grid .ag-cell.ag-cell-focus {
+  outline: 1px solid rgba(37, 99, 235, 0.55);
+}
+
+.oss-mt-cell-plain {
+  display: inline-block;
+  width: 100%;
+  text-align: inherit;
+}
+
+.oss-mt-bss-grid .oss-ag-cell-plain {
+  justify-content: center;
+}
+
+.oss-mt-bss-grid .oss-ag-header-center .ag-header-cell-label {
+  justify-content: center;
+}
+
+.oss-mt-bss-grid .oss-ag-sender:not(.oss-ag-pct),
+.oss-mt-bss-grid .text-start:not(.oss-ag-pct),
+.oss-mt-bss-grid .oss-ag-cell-plain:first-child {
+  justify-content: flex-start;
+}
+
+.oss-mt-bss-grid .oss-ag-pct {
+  padding: 0;
+}
+
+.oss-mt-bss-grid .oss-ag-pct .ag-cell-wrapper,
+.oss-mt-bss-grid .oss-ag-pct .ag-cell-value {
+  height: 100%;
+}
+
+/* Trend cell (Submitted / Delivered): full-cell tint + caret + value */
+.oss-trend-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  height: 100%;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+}
+
+.oss-trend-pill--up,
+.oss-trend-pill--down {
+  background: #b8e6c5;
+  color: #145e29;
+}
+
+.oss-trend-pill__icon {
+  font-size: 11px;
+  line-height: 1;
+}
+
+.oss-trend-pill--up .oss-trend-pill__icon {
+  color: #1f9d4c;
+}
+
+.oss-trend-pill--down .oss-trend-pill__icon {
+  color: #c93030;
+}
+
+.oss-mt-bss-grid .oss-ag-trend.ag-cell {
+  padding: 0;
+}
+
+.oss-mt-bss-grid .oss-ag-trend .ag-cell-wrapper,
+.oss-mt-bss-grid .oss-ag-trend .ag-cell-value {
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  width: 100%;
+  height: 100%;
+}
+
+/* Percent cell: colored fill width = value%, white track shows the remainder */
+.oss-pct-tint {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: var(--ag-row-height, 36px);
+  padding: 4px 8px;
+  box-sizing: border-box;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.oss-pct-tint__bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.oss-pct-tint__bar--lo {
+  background: #f5a6a6;
+}
+
+.oss-pct-tint__bar--mid {
+  background: #ffc784;
+}
+
+.oss-pct-tint__bar--hi {
+  background: #8fd9a3;
+}
+
+.oss-pct-tint__label {
+  position: relative;
+  z-index: 1;
+  color: #1a1d21;
+  letter-spacing: 0.01em;
+}

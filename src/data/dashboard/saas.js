@@ -20,7 +20,7 @@ export const activeUser = [3, 7, 6, 8, 5, 12, 11];
 
 export const statsData = [
   {
-    title: 'Customers',
+    title: 'SMS Today',
     value: 58.39,
     decimal: true,
     suffix: 'k',
@@ -28,12 +28,12 @@ export const statsData = [
     valueClassName: 'text-warning',
     badgeBg: 'warning',
     badgeText: '-0.23%',
-    link: paths.customers,
-    linkText: 'See all',
+    link: paths.smsClientsList,
+    linkText: 'View details',
     image: bg1
   },
   {
-    title: 'Orders',
+    title: 'SMS This Week',
     value: 23.43,
     decimal: true,
     suffix: 'k',
@@ -41,12 +41,12 @@ export const statsData = [
     valueClassName: 'text-info',
     badgeBg: 'info',
     badgeText: '0.0%',
-    link: paths.orderList,
-    linkText: 'All orders',
+    link: paths.smsCdrReports,
+    linkText: 'Open reports',
     image: bg2
   },
   {
-    title: 'Revenue',
+    title: 'SMS This Month',
     value: 43594,
     decimal: false,
     suffix: '',
@@ -54,8 +54,47 @@ export const statsData = [
     valueClassName: '',
     badgeBg: 'success',
     badgeText: '9.54%',
-    link: '/',
-    linkText: 'Statistics',
+    link: paths.smsAccountOverview,
+    linkText: 'View overview',
+    image: bg3
+  },
+  {
+    title: 'SMS Yesterday',
+    value: 0,
+    decimal: false,
+    suffix: '',
+    prefix: '',
+    valueClassName: 'text-warning',
+    badgeBg: 'warning',
+    badgeText: '',
+    link: paths.smsCdrReports,
+    linkText: 'View details',
+    image: bg1
+  },
+  {
+    title: 'SMS Last Week',
+    value: 0,
+    decimal: false,
+    suffix: '',
+    prefix: '',
+    valueClassName: 'text-info',
+    badgeBg: 'info',
+    badgeText: '',
+    link: paths.smsCdrReports,
+    linkText: 'View details',
+    image: bg2
+  },
+  {
+    title: 'SMS Last Month',
+    value: 0,
+    decimal: false,
+    suffix: '',
+    prefix: '',
+    valueClassName: '',
+    badgeBg: 'success',
+    badgeText: '',
+    link: paths.smsCdrReports,
+    linkText: 'View details',
     image: bg3
   }
 ];
@@ -63,27 +102,27 @@ export const statsData = [
 export const candleChartStatsData = [
   {
     id: 1,
-    title: 'Forecast Hours',
+    title: 'Queued SMS',
     grow: {
       isGrow: true,
       growAmount: 20.2,
       color: 'primary'
     },
-    amount: '2077h'
+    amount: '2,077'
   },
   {
     id: 2,
-    title: 'Workflow Hours',
+    title: 'Delivered SMS',
     grow: {
       isGrow: true,
       growAmount: 20,
       color: 'success'
     },
-    amount: '100h'
+    amount: '1,100'
   },
   {
     id: 3,
-    title: 'Forecast Income',
+    title: 'SMS Cost',
     grow: {
       isGrow: true,
       growAmount: 18,
@@ -98,7 +137,7 @@ export const transactionSummary = [
     id: 1,
     img: atlassian,
     title: 'Atlassian',
-    subtitle: 'Subscription payment',
+    subtitle: 'SMS traffic charge',
     status: 'Completed',
     amount: '$290.00 USD',
     date: '15 May, 2020'
@@ -107,7 +146,7 @@ export const transactionSummary = [
     id: 2,
     img: hubstaff,
     title: 'Hubstaff',
-    subtitle: 'Subscription payment',
+    subtitle: 'SMS traffic charge',
     status: 'Pending',
     amount: '$200.00 USD',
     date: '1 May, 2020'
@@ -116,7 +155,7 @@ export const transactionSummary = [
     id: 3,
     img: bootstrap,
     title: 'Bootstrap',
-    subtitle: 'Subscription payment',
+    subtitle: 'SMS traffic charge',
     status: 'Pending',
     amount: '$300.00 USD',
     date: '26 April, 2020'
@@ -125,7 +164,7 @@ export const transactionSummary = [
     id: 4,
     img: asana,
     title: 'Asana',
-    subtitle: 'Subscription payment',
+    subtitle: 'SMS traffic charge',
     status: 'Pending',
     amount: '$320.00 USD',
     date: '14 April, 2020'
@@ -134,7 +173,7 @@ export const transactionSummary = [
     id: 5,
     img: adobe,
     title: 'Adobe Creative Cloud',
-    subtitle: 'Subscription payment',
+    subtitle: 'SMS traffic charge',
     status: 'Pending',
     amount: '$150.00 USD',
     date: '11 April, 2020'
@@ -143,7 +182,7 @@ export const transactionSummary = [
     id: 6,
     img: coursera,
     title: 'Coursera',
-    subtitle: 'Subscription payment',
+    subtitle: 'SMS traffic charge',
     status: 'Pending',
     amount: '$280.00 USD',
     date: '26 March, 2020'
@@ -152,7 +191,7 @@ export const transactionSummary = [
     id: 7,
     img: medium,
     title: 'Medium',
-    subtitle: 'Subscription payment',
+    subtitle: 'SMS traffic charge',
     status: 'Rejected',
     amount: '$290.00 USD',
     date: '15 March, 2020'

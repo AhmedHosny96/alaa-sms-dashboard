@@ -1,0 +1,48 @@
+.rate-card-numbers {
+  .rate-card-numbers__table {
+    --rc-border: #e8ecef;
+    font-size: 0.8125rem;
+
+    thead th {
+      vertical-align: middle;
+      font-weight: 600;
+      color: #1a1d21;
+      border-color: var(--rc-border) !important;
+      background: #f1f4f7;
+    }
+
+    tbody td {
+      border-color: var(--rc-border) !important;
+      vertical-align: middle;
+    }
+
+    tbody tr:nth-child(even) td {
+      background: #fafbfc;
+    }
+
+    tbody tr:nth-child(odd) td {
+      background: #fff;
+    }
+
+    .rate-card-numbers__payouts-head {
+      text-align: center;
+      border-inline-start: 1px solid #c5d0da !important;
+    }
+
+    .rate-card-numbers__payout-cell {
+      border-inline-start: none;
+    }
+
+    thead tr:last-child th.rate-card-numbers__payout-cell {
+      font-weight: 600;
+      white-space: nowrap;
+    }
+  }
+
+  .sort-cue {
+    opacity: 0.35;
+    font-size: 0.65rem;
+    margin-inline-start: 2px;
+    vertical-align: middle;
+  }
+}

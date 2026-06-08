@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
-import { Button } from 'react-bootstrap';
 import { UseModal, useForm, Forms, UseInput, UseSelect } from 'components/common/UseTable';
+import IconButton from 'components/common/IconButton';
 
 const RoleFormModal = ({ show, onClose, onSubmit, record }) => {
   const scopeOptions = [
@@ -43,12 +43,19 @@ const RoleFormModal = ({ show, onClose, onSubmit, record }) => {
       setIsVisible={() => {}}
       onCancel={onClose}
       footer={[
-        <Button key="cancel" variant="secondary" size="sm" onClick={onClose}>
+        <IconButton key="cancel" variant="falcon-default" size="sm" onClick={onClose}>
           Cancel
-        </Button>,
-        <Button key="submit" variant="primary" size="sm" type="submit" form="role-form">
+        </IconButton>,
+        <IconButton
+          key="submit"
+          variant="primary"
+          size="sm"
+          title={record ? 'Update' : 'Save'}
+          type="submit"
+          form="role-form"
+        >
           {record ? 'Update' : 'Save'}
-        </Button>
+        </IconButton>
       ]}
     >
       <Forms id="role-form" onFinish={handleSubmit}>

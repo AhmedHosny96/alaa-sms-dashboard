@@ -40,6 +40,7 @@ td .dropdown-toggle {
   }
 }
 
-// .table-responsive {
-//   @extend .scrollbar;
-// }
+.table-responsive {
+  @extend .scrollbar;
+  -webkit-overflow-scrolling: touch;
+}

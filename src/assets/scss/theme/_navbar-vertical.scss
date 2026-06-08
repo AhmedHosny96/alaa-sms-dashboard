@@ -113,8 +113,7 @@
 
   // Navbar Variant
   &.navbar-card,
-  &.navbar-vibrant,
-  &.navbar-inverted {
+  &.navbar-vibrant {
     padding-left: map-get($spacers, 3);
     padding-right: map-get($spacers, 3);
     .navbar-collapse {
@@ -125,6 +124,18 @@
       max-height: calc(
         100vh - #{$top-nav-height} - #{map-get($spacers, 3)}
       ) !important;
+    }
+  }
+  &.navbar-inverted {
+    padding-left: 0;
+    padding-right: 0;
+    background-color: var(--#{$prefix}navbar-vertical-inverted-bg-color);
+    .navbar-collapse {
+      border-radius: 0;
+    }
+    .navbar-collapse,
+    .navbar-vertical-content {
+      max-height: 100vh !important;
     }
   }
   @include navbar-vertical-variant('default', true, false, false);
@@ -212,6 +223,26 @@
 
         + .content {
           margin-left: $navbar-vertical-variation-width + 1;
+        }
+      }
+
+      &.navbar-inverted {
+        height: 100vh;
+        top: 0;
+        background-color: var(--#{$prefix}navbar-vertical-inverted-bg-color);
+        .navbar-collapse {
+          height: 100vh;
+          min-height: 100vh;
+          border-radius: 0;
+          display: flex !important;
+          flex-direction: column;
+          background-color: transparent;
+        }
+        .navbar-vertical-content {
+          height: 100vh !important;
+          max-height: 100vh !important;
+          min-height: 100vh !important;
+          flex: 1;
         }
       }
 
@@ -336,3 +367,95 @@
     }
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// Sidebar scrollbar polish — make the scrollbar blend with the inverted
+// (dark) sidebar background instead of showing a lighter strip on the right
+// edge of the menu. Applies to all browsers (the original mixin scoped its
+// rules to `.windows.chrome`, leaving the scrollbar unstyled elsewhere).
+// ─────────────────────────────────────────────────────────────────────────
+
+.navbar-vertical.navbar-inverted {
+  .scrollbar,
+  .navbar-vertical-content {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+  }
+
+  .scrollbar::-webkit-scrollbar,
+  .navbar-vertical-content::-webkit-scrollbar {
+    width: 6px;
+    background: transparent;
+  }
+
+  .scrollbar::-webkit-scrollbar-track,
+  .navbar-vertical-content::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar::-webkit-scrollbar-thumb,
+  .navbar-vertical-content::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.18);
+    border-radius: 3px;
+  }
+
+  .scrollbar::-webkit-scrollbar-thumb:hover,
+  .navbar-vertical-content::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.28);
+  }
+}
+
+.navbar-vertical:not(.navbar-inverted) {
+  .scrollbar,
+  .navbar-vertical-content {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.12) transparent;
+  }
+
+  .scrollbar::-webkit-scrollbar,
+  .navbar-vertical-content::-webkit-scrollbar {
+    width: 6px;
+    background: transparent;
+  }
+
+  .scrollbar::-webkit-scrollbar-track,
+  .navbar-vertical-content::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar::-webkit-scrollbar-thumb,
+  .navbar-vertical-content::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.12);
+    border-radius: 3px;
+  }
+
+  .scrollbar::-webkit-scrollbar-thumb:hover,
+  .navbar-vertical-content::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.22);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Zoom-level consistency — keep sidebar/content proportions at any browser
+// zoom (50%–150%). Lock the sidebar width and ensure the content area always
+// fills the rest of the viewport so zooming doesn't introduce mid-page gaps
+// or sidebar content overflowing.
+// ─────────────────────────────────────────────────────────────────────────
+
+@each $item, $value in $navbar-vertical-breakpoints {
+  @include media-breakpoint-up($item) {
+    .navbar-vertical.navbar-expand-#{$item} {
+      flex: 0 0 $navbar-vertical-width;
+      min-width: $navbar-vertical-width;
+      // Anchor the fixed-position sidebar to the viewport's left edge.
+      // Without this, the surrounding `.container` from MainLayout adds
+      // ~12px padding-left so the body's lavender (--falcon-body-bg) bleeds
+      // through as a thin strip to the left of the dark sidebar.
+      left: 0;
+    }
+    .navbar-vertical.navbar-expand-#{$item} + .content {
+      min-height: 100vh;
+    }
+  }
+}
+

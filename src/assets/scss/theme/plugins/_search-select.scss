@@ -1,0 +1,225 @@
+// Clean, compact searchable select used by TableSelectFilter (filter rows)
+// and UseSelect (form fields). Uses its own `search-select__*` class prefix
+// so portaled menus get the new look without inheriting legacy
+// `.react-select__*` rules from `_react-select.scss`.
+
+.search-select {
+  // Default width is `auto` (shrink to content) so the select sits at its
+  // natural width inside flex toolbars instead of stretching to fill the
+  // parent like a vanilla react-select does. Explicit flex sizing (no grow,
+  // no shrink, basis from content) prevents stray parent rules from spreading
+  // items via space-between or auto-margins.
+  width: auto !important;
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+
+  &--sm {
+    min-width: 130px;
+  }
+
+  &--md {
+    min-width: 220px;
+  }
+
+  // Match Bootstrap btn-sm / form-control-sm height (~31px) so filter rows align.
+  &--sm .search-select__control {
+    min-height: 31px;
+    height: 31px;
+    padding: 0 4px 0 2px;
+    font-size: 0.8125rem;
+  }
+
+  // Match Bootstrap form-control default (~38px) for form fields.
+  &--md .search-select__control {
+    min-height: 38px;
+    padding: 0 8px 0 4px;
+    font-size: 0.875rem;
+  }
+}
+
+.search-select__control {
+  background-color: var(--#{$prefix}quaternary-bg) !important;
+  border: 1px solid var(--#{$prefix}border-color) !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+  cursor: text;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+  flex-wrap: nowrap !important;
+  // Vertically center the leading icon, placeholder/value, and dropdown chevron.
+  // Without this, in the taller `--md` form size the chevron sits at the top-right.
+  align-items: center !important;
+
+  &:hover {
+    border-color: var(--#{$prefix}gray-400) !important;
+  }
+
+  &--is-focused {
+    border-color: var(--#{$prefix}primary) !important;
+    box-shadow: 0 0 0 2px rgba(var(--#{$prefix}primary-rgb), 0.15) !important;
+  }
+
+  &--is-disabled {
+    background-color: var(--#{$prefix}gray-100) !important;
+    cursor: not-allowed;
+  }
+}
+
+.search-select--invalid .search-select__control {
+  border-color: var(--#{$prefix}danger) !important;
+
+  &--is-focused {
+    box-shadow: 0 0 0 2px rgba(var(--#{$prefix}danger-rgb), 0.15) !important;
+  }
+}
+
+.search-select__leading-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 12px;
+  margin-left: 6px;
+  margin-right: 4px;
+  color: var(--#{$prefix}gray-500);
+  font-size: 10px;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.search-select__value-container {
+  padding: 0 2px !important;
+  flex-wrap: nowrap !important;
+}
+
+.search-select__placeholder {
+  color: var(--#{$prefix}gray-500) !important;
+  margin: 0 !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-select__single-value {
+  color: var(--#{$prefix}body-color) !important;
+  margin: 0 !important;
+}
+
+.search-select__input-container {
+  margin: 0 !important;
+  padding: 0 !important;
+  color: var(--#{$prefix}body-color) !important;
+}
+
+.search-select__indicators {
+  height: 100%;
+  align-items: center !important;
+  align-self: center !important;
+}
+
+.search-select__indicator-separator {
+  display: none !important;
+  width: 0 !important;
+  background: none !important;
+}
+
+.search-select__indicator {
+  padding: 2px 4px !important;
+  color: var(--#{$prefix}gray-500) !important;
+
+  &:hover {
+    color: var(--#{$prefix}gray-700) !important;
+  }
+
+  svg {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+.search-select__clear-indicator {
+  padding: 2px 2px !important;
+
+  svg {
+    width: 11px;
+    height: 11px;
+  }
+}
+
+// Menu styling — applied globally because react-select portals the menu
+// to document.body, so descendant selectors from `.search-select` would not
+// reach it. The `search-select__menu` class is added by classNamePrefix.
+
+.search-select__menu {
+  margin-top: 4px !important;
+  border-radius: 8px !important;
+  border: 1px solid var(--#{$prefix}border-color) !important;
+  background-color: var(--#{$prefix}quaternary-bg) !important;
+  box-shadow: 0 8px 24px rgba(16, 24, 40, 0.08), 0 2px 6px rgba(16, 24, 40, 0.04) !important;
+  overflow: hidden;
+  font-size: 0.8125rem;
+}
+
+.search-select__menu-list {
+  padding: 4px !important;
+  max-height: 240px;
+}
+
+.search-select__option {
+  padding: 5px 8px !important;
+  border-radius: 4px !important;
+  margin: 0 !important;
+  color: var(--#{$prefix}body-color) !important;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  min-height: 0 !important;
+  transition: background-color 0.08s ease;
+
+  & + .search-select__option {
+    margin-top: 1px !important;
+  }
+
+  &--is-focused {
+    background-color: var(--#{$prefix}gray-100) !important;
+    color: var(--#{$prefix}body-color) !important;
+  }
+
+  &--is-selected {
+    background-color: rgba(var(--#{$prefix}primary-rgb), 0.1) !important;
+    color: var(--#{$prefix}primary) !important;
+    font-weight: 600;
+  }
+
+  &--is-selected.search-select__option--is-focused {
+    background-color: rgba(var(--#{$prefix}primary-rgb), 0.15) !important;
+  }
+
+  &--is-disabled {
+    color: var(--#{$prefix}gray-500) !important;
+    cursor: not-allowed;
+  }
+}
+
+.search-select__empty {
+  display: block;
+  padding: 6px 8px;
+  color: var(--#{$prefix}gray-500);
+  font-size: 0.8125rem;
+  text-align: center;
+}
+
+// AdvanceTableDateRangeFilter renders react-datepicker, which wraps its
+// custom input in `.react-datepicker-wrapper`. Falcon's global rule sets
+// that wrapper to `width: 100%` (sensible inside a form column, but in a
+// flex toolbar it inflates the wrapper and creates an empty gap to the
+// right of the date button). The component now passes
+// `wrapperClassName="advance-table-date-range-wrapper"` so we can override
+// the width in any toolbar context.
+.advance-table-date-range-wrapper.react-datepicker-wrapper,
+.react-datepicker-wrapper.advance-table-date-range-wrapper {
+  width: auto !important;
+  flex: 0 0 auto !important;
+}

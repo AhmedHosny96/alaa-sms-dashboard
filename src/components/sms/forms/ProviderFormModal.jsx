@@ -1,23 +1,44 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Button, Col, Form, Row } from 'react-bootstrap';
+import { Col, Form, Row } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { UseModal, useForm, Forms, UseInput, UseSelect } from 'components/common/UseTable';
 import { isValidIPv4ClassABC } from 'helpers/utils';
+import IconButton from 'components/common/IconButton';
+import { SMPP_BIND_MODE_OPTIONS, canonicalSmppBindMode } from 'constants/smppBindMode';
 
-const ProviderFormModal = ({ show, onClose, record, onSubmit }) => {
+const ProviderFormModal = ({
+  show,
+  onClose,
+  record,
+  onSubmit,
+  showConnectorField = false,
+  modalTitle,
+  closeOnSubmit = true
+}) => {
   const initialProviderValues = useMemo(
     () => ({
-      providerName: record?.providerName ?? '',
+      connectorId: record?.connectorId ?? '',
+      providerName: record?.providerName ?? record?.name ?? '',
       email: record?.email ?? '',
+      username: record?.username ?? '',
+      password: record?.password ?? '',
       throughput: record?.throughput ?? '',
       ipAddresses: record?.ipAddresses ?? '',
       httpNumberField: record?.httpNumberField ?? '',
       httpCliField: record?.httpCliField ?? '',
+      apiUrl: record?.apiUrl ?? '',
+      messageField: record?.messageField ?? '',
+      messageValue: record?.messageValue ?? '',
+      uniqueIdField: record?.uniqueIdField ?? '',
+      uniqueIdValue: record?.uniqueIdValue ?? '',
+      returnValue: record?.returnValue ?? '',
+      uuidValue: record?.uuidValue ?? '',
+      ussdIpAddresses: record?.ussdIpAddresses ?? '',
       smppHost: record?.smppHost ?? '',
       smppPort: record?.smppPort ?? '',
       smppSystemId: record?.smppSystemId ?? '',
       smppPassword: record?.smppPassword ?? '',
-      smppBindMode: record?.smppBindMode ?? ''
+      smppBindMode: canonicalSmppBindMode(record?.smppBindMode)
     }),
     [record]
   );
@@ -61,36 +82,49 @@ const ProviderFormModal = ({ show, onClose, record, onSubmit }) => {
     setProviderIpList((prev) => prev.filter((x) => x !== ip));
   };
 
-  const bindModeOptions = [
-    { id: 'tx', name: 'TX (Transmitter)' },
-    { id: 'rx', name: 'RX (Receiver)' },
-    { id: 'trx', name: 'TRX (Transceiver)' }
-  ];
-
   const handleProviderSubmit = () => {
     const payload = { ...values, ipAddresses: providerIpList.join('\n') };
     onSubmit?.(payload);
-    onClose?.();
+    if (closeOnSubmit) onClose?.();
   };
+
+  const title = modalTitle ?? (record ? 'Edit Carrier' : 'Add New Carrier');
 
   return (
     <UseModal
-      title={record ? 'Edit Carrier' : 'Add New Carrier'}
+      title={title}
       isVisible={show}
       setIsVisible={() => {}}
       onCancel={onClose}
       size="xl"
       footer={[
-        <Button key="close" variant="secondary" size="sm" onClick={onClose}>
+        <IconButton key="close" variant="falcon-default" size="sm" onClick={onClose}>
           Close
-        </Button>,
-        <Button key="submit" variant="primary" size="sm" type="submit" form="provider-form">
+        </IconButton>,
+        <IconButton key="submit" variant="primary" size="sm" type="submit" form="provider-form">
           {record ? 'Update' : 'Add'}
-        </Button>
+        </IconButton>
       ]}
     >
       <Forms id="provider-form" onFinish={handleProviderSubmit}>
         <h6 className="text-900 mb-2">Carrier details</h6>
+        {showConnectorField && (
+          <Row>
+            <Col md={6}>
+              <UseInput
+                name="connectorId"
+                label="MT connector id"
+                value={values.connectorId}
+                onChange={handleOnChange}
+                placeholder="smppc id on Jasmin (e.g. mahdi)"
+              />
+              <div className="text-700 fs--2 mb-2">
+                Must match the Jasmin smppc connector that receives MT for this link. Optional on create — a unique id
+                is generated if empty.
+              </div>
+            </Col>
+          </Row>
+        )}
         <Row>
           <Col md={6}>
             <UseInput
@@ -109,6 +143,27 @@ const ProviderFormModal = ({ show, onClose, record, onSubmit }) => {
               value={values.email}
               onChange={handleOnChange}
               placeholder="abc@xyz.com"
+            />
+          </Col>
+        </Row>
+        <Row>
+          <Col md={6}>
+            <UseInput
+              name="username"
+              label="Username"
+              value={values.username}
+              onChange={handleOnChange}
+              placeholder="carrier_user"
+            />
+          </Col>
+          <Col md={6}>
+            <UseInput
+              name="password"
+              label="Password"
+              type="password"
+              value={values.password}
+              onChange={handleOnChange}
+              placeholder="password"
             />
           </Col>
         </Row>
@@ -198,6 +253,95 @@ const ProviderFormModal = ({ show, onClose, record, onSubmit }) => {
             />
           </Col>
         </Row>
+        <Row>
+          <Col md={6}>
+            <UseInput
+              name="apiUrl"
+              label="API URL"
+              value={values.apiUrl}
+              onChange={handleOnChange}
+              placeholder="https://api.provider.com/sms"
+            />
+          </Col>
+          <Col md={6}>
+            <UseInput
+              name="messageField"
+              label="Message Field"
+              value={values.messageField}
+              onChange={handleOnChange}
+              placeholder="message"
+            />
+          </Col>
+        </Row>
+        <Row>
+          <Col md={6}>
+            <UseInput
+              name="uniqueIdField"
+              label="Unique ID Field"
+              value={values.uniqueIdField}
+              onChange={handleOnChange}
+              placeholder="unique"
+            />
+          </Col>
+          <Col md={6}>
+            <UseInput
+              name="uniqueIdValue"
+              label="Unique ID"
+              value={values.uniqueIdValue}
+              onChange={handleOnChange}
+              placeholder="Unique"
+            />
+          </Col>
+        </Row>
+        <Row>
+          <Col md={6}>
+            <UseInput
+              name="returnValue"
+              label="Return Value"
+              value={values.returnValue}
+              onChange={handleOnChange}
+              placeholder="#true"
+            />
+            <Form.Text className="text-700">
+              Dynamic values: #uuid (Return UUID), #true (Return True), #dt (Return Timestamp)
+            </Form.Text>
+          </Col>
+          <Col md={6}>
+            <UseInput
+              name="uuidValue"
+              label="UUID"
+              value={values.uuidValue}
+              onChange={handleOnChange}
+              placeholder="#uuid"
+            />
+          </Col>
+        </Row>
+        <Row>
+          <Col md={12}>
+            <UseInput
+              name="messageValue"
+              label="Message"
+              as="textarea"
+              rows={3}
+              value={values.messageValue}
+              onChange={handleOnChange}
+              placeholder="Type default message or template"
+            />
+          </Col>
+        </Row>
+        <Row>
+          <Col md={12}>
+            <UseInput
+              name="ussdIpAddresses"
+              label="USSD IP Addresses"
+              as="textarea"
+              rows={3}
+              value={values.ussdIpAddresses}
+              onChange={handleOnChange}
+              placeholder="Enter IPs, one per line"
+            />
+          </Col>
+        </Row>
         <h6 className="text-900 mb-2 mt-2">SMPP Bind</h6>
         <Row>
           <Col md={6}>
@@ -246,7 +390,7 @@ const ProviderFormModal = ({ show, onClose, record, onSubmit }) => {
               name="smppBindMode"
               label="Bind Mode"
               value={values.smppBindMode}
-              options={bindModeOptions}
+              options={SMPP_BIND_MODE_OPTIONS}
               onChange={(v) => setValues((prev) => ({ ...prev, smppBindMode: v }))}
               placeholder="Please Select"
             />

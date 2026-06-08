@@ -1,47 +1,79 @@
-import React from 'react';
-import { Card, Col, Container, Row, Table } from 'react-bootstrap';
+import React, { useMemo, useState } from 'react';
+import TableSearchInput from 'components/common/TableSearchInput';
+import IconButton from 'components/common/IconButton';
+import TablePageLayout from 'components/common/TablePageLayout';
+import { UseTable, TableExportSelect } from 'components/common/UseTable';
 
-const SmsProviders = () => (
-  <Container fluid className="py-3">
-    <Row className="mb-3">
-      <Col>
-        <h2 className="mb-0">SMS Providers & Routing</h2>
-        <p className="text-700 mb-0">
-          Manage SMPP and HTTP providers, routes and priorities.
-        </p>
-      </Col>
-    </Row>
-    <Row>
-      <Col>
-        <Card>
-          <Card.Header>
-            <h5 className="mb-0">Configured Providers</h5>
-          </Card.Header>
-          <Card.Body className="p-0">
-            <Table responsive hover className="mb-0">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Type</th>
-                  <th>Status</th>
-                  <th>Throughput</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td colSpan={5} className="text-center text-700 py-4">
-                    Provider list will be loaded from the core API.
-                  </td>
-                </tr>
-              </tbody>
-            </Table>
-          </Card.Body>
-        </Card>
-      </Col>
-    </Row>
-  </Container>
-);
+const SMS_PROVIDER_COLUMNS = [
+  { title: 'Name', dataIndex: 'name', key: 'name' },
+  { title: 'Type', dataIndex: 'type', key: 'type' },
+  { title: 'Status', dataIndex: 'status', key: 'status' },
+  { title: 'Throughput', dataIndex: 'throughput', key: 'throughput' },
+  { title: 'Actions', dataIndex: 'actions', key: 'actions', align: 'right' }
+];
+
+const SmsProviders = () => {
+  const [data] = useState([]);
+  const [loading] = useState(false);
+  const [query, setQuery] = useState('');
+
+  const columns = useMemo(() => SMS_PROVIDER_COLUMNS, []);
+  const { TableContainer } = UseTable(columns, data, loading);
+
+  const filteredData = useMemo(() => {
+    let list = Array.isArray(data) ? [...data] : [];
+    if (query) {
+      const q = query.toLowerCase();
+      list = list.filter((row) =>
+        [row.name, row.type, row.status, row.throughput]
+          .filter((v) => v != null)
+          .some((val) => String(val).toLowerCase().includes(q))
+      );
+    }
+    return list;
+  }, [data, query]);
+
+  return (
+    <TablePageLayout
+      title="SMS Providers & Routing"
+      subtitle="Manage SMPP and HTTP providers, routes and priorities."
+      toolbar={
+        <>
+          <IconButton
+            variant="primary"
+            size="sm"
+            icon="plus"
+            transform="shrink-3"
+            title="New"
+          >
+            <span className="d-none d-sm-inline-block ms-1">New</span>
+          </IconButton>
+          <TableExportSelect
+            icon="external-link-alt"
+            variant="falcon-default"
+            className="mx-2"
+            onExport={(type) => {
+              if (type === 'print') window.print();
+            }}
+          />
+          <TableSearchInput
+            className="table-page-filter"
+            value={query}
+            onChange={setQuery}
+            placeholder="search ..."
+          />
+        </>
+      }
+    >
+      <TableContainer
+        dataSource={filteredData}
+        loading={loading}
+        rowKey={(r) => r.id ?? r.name}
+        className="table-sm fs-10 mb-0 overflow-hidden"
+      />
+    </TablePageLayout>
+  );
+};
 
 export default SmsProviders;
 

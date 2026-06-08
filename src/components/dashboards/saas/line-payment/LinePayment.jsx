@@ -1,11 +1,10 @@
-import React, { useRef, useState } from 'react';
-import { Card, Col, Form, Row } from 'react-bootstrap';
+import React, { useRef } from 'react';
+import { Card, Col, Row } from 'react-bootstrap';
 import Flex from 'components/common/Flex';
 import LinePaymentChart from './LinePaymentChart';
 
-const LinePayment = ({ data }) => {
+const LinePayment = ({ data, title = 'SMS Volume (24h)', subtitle = '', subtitleValue = '' }) => {
   const chartRef = useRef(null);
-  const [paymentStatus, setPaymentStatus] = useState('successful');
 
   return (
     <Card className="rounded-3 overflow-hidden h-100 shadow-none">
@@ -17,28 +16,18 @@ const LinePayment = ({ data }) => {
       >
         <Row className="align-items-center gx-2 gy-0">
           <Col>
-            <h4 className="text-white mb-0 text-nowrap">Today $764.39</h4>
-            <p className="fs-10 fw-semibold text-white">
-              Yesterday <span className="opacity-50">$684.87</span>
-            </p>
-          </Col>
-          <Col xs="auto">
-            <Form.Select
-              size="sm"
-              className="mb-3"
-              value={paymentStatus}
-              onChange={e => setPaymentStatus(e.target.value)}
-            >
-              <option value="all">All Payments</option>
-              <option value="successful">Successful Payments</option>
-              <option value="failed">Failed Payments</option>
-            </Form.Select>
+            <h4 className="text-white mb-0 text-nowrap">{title}</h4>
+            {subtitle && (
+              <p className="fs-10 fw-semibold text-white mb-0">
+                {subtitle}{subtitleValue && <span className="opacity-50"> {subtitleValue}</span>}
+              </p>
+            )}
           </Col>
         </Row>
         <LinePaymentChart
           ref={chartRef}
           data={data}
-          paymentStatus={paymentStatus}
+          paymentStatus="successful"
           style={{ height: '200px' }}
         />
       </Card.Body>

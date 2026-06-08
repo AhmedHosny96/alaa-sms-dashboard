@@ -1,12 +1,7 @@
 import React from 'react';
-import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useAppContext } from 'providers/AppProvider';
-
-const renderTooltip = props => (
-  <Tooltip style={{ position: 'fixed' }} id="button-tooltip" {...props}>
-    Toggle Navigation
-  </Tooltip>
-);
 
 const ToggleButton = () => {
   const {
@@ -22,25 +17,19 @@ const ToggleButton = () => {
   };
 
   return (
-    <OverlayTrigger
-      placement={
-        isFluid ? (isRTL ? 'bottom' : 'right') : isRTL ? 'bottom' : 'left'
-      }
-      overlay={renderTooltip}
-    >
-      <div className="toggle-icon-wrapper">
-        <Button
-          variant="link"
-          className="navbar-toggler-humburger-icon navbar-vertical-toggle"
-          id="toggleNavigationTooltip"
-          onClick={handleClick}
-        >
-          <span className="navbar-toggle-icon">
-            <span className="toggle-line" />
-          </span>
-        </Button>
-      </div>
-    </OverlayTrigger>
+    <div className="toggle-icon-wrapper">
+      <Button
+        variant="link"
+        className="navbar-vertical-toggle navbar-vertical-toggle-btn"
+        id="toggleNavigationTooltip"
+        onClick={handleClick}
+      >
+        <FontAwesomeIcon
+          icon={isNavbarVerticalCollapsed ? 'chevron-right' : 'chevron-left'}
+          className="navbar-vertical-toggle-icon"
+        />
+      </Button>
+    </div>
   );
 };
 

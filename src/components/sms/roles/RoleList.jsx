@@ -1,68 +1,62 @@
 import React, { useMemo, useState } from 'react';
-import { Button, Badge } from 'react-bootstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  UseTable,
-  Search,
-  TableExportSelect,
-  TableSelectFilter,
-  ConfirmDelete
-} from 'components/common/UseTable';
-import TablePageLayout from 'components/common/TablePageLayout';
+import { Badge, Card, Col, Row } from 'react-bootstrap';
+import TableSearchInput from 'components/common/TableSearchInput';
+import AdvanceTable from 'components/common/advance-table/AdvanceTable';
+import AdvanceTableFooter from 'components/common/advance-table/AdvanceTableFooter';
+import AdvanceTableProvider from 'providers/AdvanceTableProvider';
+import { TableSelectFilter, ConfirmDelete, TableExportSelect } from 'components/common/UseTable';
 import RoleFormModal from 'components/sms/forms/RoleFormModal';
+import IconButton from 'components/common/IconButton';
+import useAdvanceTable from 'hooks/useAdvanceTable';
 
 const ROLE_COLUMNS = (onEdit, onDelete) => [
-  { title: 'Role', dataIndex: 'name', key: 'name' },
-  { title: 'Scope', dataIndex: 'scope', key: 'scope' },
-  { title: 'Description', dataIndex: 'description', key: 'description' },
+  { accessorKey: 'name', header: 'Role', meta: { headerProps: { className: 'text-900' } } },
+  { accessorKey: 'scope', header: 'Scope', meta: { headerProps: { className: 'text-900' } } },
+  { accessorKey: 'description', header: 'Description', meta: { headerProps: { className: 'text-900' } } },
   {
-    title: 'Status',
-    dataIndex: 'status',
-    key: 'status',
-    render: (value) => (
-      <Badge bg={value === 'Active' ? 'success' : 'secondary'} className="text-uppercase">
-        {value || '—'}
+    accessorKey: 'status',
+    header: 'Status',
+    meta: { headerProps: { className: 'text-900' } },
+    cell: ({ row: { original } }) => (
+      <Badge
+        bg={original.status === 'Active' ? 'success' : 'secondary'}
+        className="text-uppercase"
+      >
+        {original.status || '—'}
       </Badge>
     )
   },
   {
-    title: 'Actions',
-    key: 'actions',
-    align: 'center',
-    width: 100,
-    render: (_, record) => (
-      <div className="d-flex justify-content-center gap-1">
-        <Button
-          variant="warning"
+    accessorKey: 'actions',
+    header: 'Actions',
+    enableSorting: false,
+    meta: { headerProps: { className: 'text-900 text-center' }, cellProps: { className: 'text-center' } },
+    cell: ({ row: { original } }) => (
+      <div className="d-inline-flex align-items-center">
+        <IconButton
+          variant="falcon-default"
           size="sm"
-          className="px-2 py-0"
-          onClick={() => onEdit(record)}
+          icon="edit"
+          transform="shrink-3"
+          className="me-2 text-primary shadow-none"
           title="Edit"
-        >
-          <FontAwesomeIcon icon="edit" />
-        </Button>
-        <Button
-          variant="danger"
+          onClick={() => onEdit(original)}
+        />
+        <IconButton
+          variant="falcon-default"
           size="sm"
-          className="px-2 py-0"
-          onClick={() => onDelete(record)}
+          icon="trash"
+          transform="shrink-3"
+          className="text-danger shadow-none"
           title="Delete"
-        >
-          <FontAwesomeIcon icon="trash-alt" />
-        </Button>
+          onClick={() => onDelete(original)}
+        />
       </div>
     )
   }
 ];
 
 const DEFAULT_ROLES = [
-  {
-    id: 'platform-owner',
-    name: 'Platform Owner',
-    scope: 'Platform Owner',
-    description: 'Full system control and global visibility.',
-    status: 'Active'
-  },
   {
     id: 'company-admin',
     name: 'Company Admin',
@@ -109,7 +103,6 @@ const RoleList = () => {
   ];
 
   const scopeOptions = [
-    { value: 'Platform Owner', label: 'Platform Owner' },
     { value: 'Company', label: 'Company' },
     { value: 'Client', label: 'Client' }
   ];
@@ -125,8 +118,6 @@ const RoleList = () => {
       ),
     []
   );
-
-  const { TableContainer } = UseTable(columns, data, loading);
 
   const filteredData = useMemo(() => {
     let list = Array.isArray(data) ? [...data] : [];
@@ -164,49 +155,85 @@ const RoleList = () => {
     handleCloseModal();
   };
 
+  const table = useAdvanceTable({
+    data: filteredData,
+    columns,
+    selection: true,
+    sortable: true,
+    pagination: true,
+    perPage: 25,
+    selectionColumnWidth: 30
+  });
+
   return (
     <>
-      <TablePageLayout
-        title="Roles"
-        subtitle="Create and manage role permissions and access levels."
-        toolbar={
-          <>
-            <div className="d-flex gap-2 flex-wrap align-items-center">
-              <Button variant="primary" size="sm" className="table-page-addButton" onClick={handleAdd}>
-                <FontAwesomeIcon icon="plus" className="me-1" />
-                Add Role
-              </Button>
-              {/* <TableSelectFilter
-                className="table-page-filter"
-                value={filterScope}
-                placeholder="Scope"
-                onChange={(value) => setFilterScope(value)}
-                options={scopeOptions}
-              /> */}
-              <TableSelectFilter
-                className="table-page-filter"
-                value={filterStatus}
-                placeholder="Status"
-                onChange={(value) => setFilterStatus(value)}
-                options={statusOptions}
-              />
-              {/* <TableExportSelect
-                onExport={(type) => {
-                  if (type === 'print') window.print();
-                }}
-              /> */}
-            </div>
-            <Search
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search ..."
-              className="table-page-search"
+      <AdvanceTableProvider {...table}>
+        <Card className="mb-3">
+          <Card.Header>
+            <Row className="flex-between-center">
+              <Col xs={4} sm="auto" className="d-flex align-items-center pe-0">
+                <h5 className="fs-9 mb-0 text-nowrap py-2 py-xl-0">Roles</h5>
+              </Col>
+              <Col xs={12} sm="auto" className="ps-0">
+                <div id="roles-actions" className="d-flex align-items-center flex-nowrap gap-2">
+                  <IconButton
+                    variant="primary"
+                    size="sm"
+                    icon="plus"
+                    transform="shrink-3"
+                    title="New"
+                    onClick={handleAdd}
+                  >
+                    <span className="d-none d-sm-inline-block ms-1">New</span>
+                  </IconButton>
+                    <TableSelectFilter
+                      className="table-page-filter"
+                      value={filterScope}
+                      placeholder="Filter Scope"
+                      onChange={(value) => setFilterScope(value)}
+                      options={scopeOptions}
+                    />
+                    <TableSelectFilter
+                      className="table-page-filter"
+                      value={filterStatus}
+                      placeholder="Filter Status"
+                      onChange={(value) => setFilterStatus(value)}
+                      options={statusOptions}
+                    />
+                    <TableExportSelect
+                      icon="external-link-alt"
+                      variant="falcon-default"
+                      className="mx-2"
+                      onExport={(type) => {
+                        if (type === 'print') window.print();
+                      }}
+                    />
+                    <TableSearchInput
+                      className="table-page-filter"
+                      value={query}
+                      onChange={setQuery}
+                      placeholder="search ..."
+                    />
+                  </div>
+              </Col>
+            </Row>
+          </Card.Header>
+          <Card.Body className="p-0">
+            <AdvanceTable
+              headerClassName="bg-200 text-nowrap align-middle"
+              rowClassName="align-middle white-space-nowrap"
+              tableProps={{
+                size: 'sm',
+                striped: true,
+                className: 'fs-10 mb-0 overflow-hidden'
+              }}
             />
-          </>
-        }
-      >
-        <TableContainer dataSource={filteredData} loading={loading} rowKey={(r) => r.id ?? r.name} />
-      </TablePageLayout>
+          </Card.Body>
+          <Card.Footer>
+            <AdvanceTableFooter rowsPerPageSelection navButtons rowInfo rowsPerPageOptions={[25, 50, 100, 250, 500, 1000, 5000]} />
+          </Card.Footer>
+        </Card>
+      </AdvanceTableProvider>
 
       <RoleFormModal
         show={modalShow}

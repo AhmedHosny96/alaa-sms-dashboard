@@ -6,18 +6,19 @@ import Flex from 'components/common/Flex';
 import classNames from 'classnames';
 import cloudDownload from 'assets/img/icons/cloud-download.svg';
 import editAlt from 'assets/img/icons/edit-alt.svg';
+import filePlaceholder from 'assets/img/logos/bs-5.png';
 
-const SharedFiles = ({ files, className }) => {
+const SharedFiles = ({ files, className, title = 'Shared Files', viewAllText = 'View All' }) => {
   return (
     <Card className={className}>
       <FalconCardHeader
-        title="Shared Files"
+        title={title}
         titleTag="h6"
         className="py-2"
         light
         endEl={
           <Link className="py-1 fs-10 font-sans-serif" to="#!">
-            View All
+            {viewAllText}
           </Link>
         }
       />
@@ -36,6 +37,7 @@ const SharedFiles = ({ files, className }) => {
 
 const SharedFile = ({ file, isLast }) => {
   const { img, name, user, time, border } = file;
+  const src = img || filePlaceholder;
   return (
     <>
       <Flex alignItems="center" className="mb-3 hover-actions-trigger">
@@ -44,7 +46,7 @@ const SharedFile = ({ file, isLast }) => {
             className={classNames('h-100 w-100 fit-cover rounded-2', {
               border: border
             })}
-            src={img}
+            src={src}
             alt=""
           />
         </div>
@@ -71,7 +73,7 @@ const SharedFile = ({ file, isLast }) => {
                 size="sm"
                 className="border-300 me-1 text-600"
                 as={'a'}
-                href={img}
+                href={src}
                 download
               >
                 <img src={cloudDownload} alt="Download" width={15} />

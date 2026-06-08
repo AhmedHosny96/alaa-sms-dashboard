@@ -8,14 +8,16 @@ const IconButton = (
 ) => (
   <Button {...rest} ref={ref}>
     {iconAlign === 'right' && children}
-    <FontAwesomeIcon
-      icon={icon}
-      className={classNames(iconClassName, {
-        'me-1': children && iconAlign === 'left',
-        'ms-1': children && iconAlign === 'right'
-      })}
-      transform={transform}
-    />
+    {icon ? (
+      <FontAwesomeIcon
+        icon={icon}
+        className={classNames(iconClassName, {
+          'me-1': children && iconAlign === 'left',
+          'ms-1': children && iconAlign === 'right'
+        })}
+        transform={transform}
+      />
+    ) : null}
     {iconAlign === 'left' || iconAlign === 'middle' ? children : false}
   </Button>
 );

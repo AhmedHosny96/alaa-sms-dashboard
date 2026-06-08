@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Button, Form } from 'react-bootstrap';
+import TableSearchInput from 'components/common/TableSearchInput';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { UseTable, Search, TableExportSelect, ConfirmDelete, UseModal, useForm, Forms, UseInput, UseSelect } from 'components/common/UseTable';
+import { UseTable, TableExportSelect, ConfirmDelete, UseModal, useForm, Forms, UseInput, UseSelect } from 'components/common/UseTable';
+import IconButton from 'components/common/IconButton';
 import TablePageLayout from 'components/common/TablePageLayout';
 import { isValidIPv4ClassABC } from 'helpers/utils';
 
@@ -146,33 +148,43 @@ const ApiKeys = () => {
     <>
       <TablePageLayout
         title="API Keys"
-        subtitle="Manage company API keys and access settings."
+       // subtitle="Manage company API keys and access settings."
         toolbar={
-          <>
-            <div className="d-flex gap-2 flex-wrap align-items-center">
-              <Button variant="primary" size="sm" className="table-page-addButton" onClick={handleAdd}>
-                <FontAwesomeIcon icon="plus" className="me-1" />
-                Generate New Key
-              </Button>
-              <TableExportSelect
-                onExport={(type) => {
-                  if (type === 'print') window.print();
-                }}
-              />
-            </div>
-            <Search
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="search ..."
-              className="table-page-search"
+          <div id="orders-actions" className="d-flex align-items-center flex-nowrap">
+            <IconButton
+              variant="primary"
+              size="sm"
+              icon="plus"
+              transform="shrink-3"
+              className="table-page-addButton"
+              onClick={handleAdd}
+              title="New"
+            >
+              <span className="d-none d-sm-inline-block ms-1">New</span>
+            </IconButton>
+            <TableExportSelect
+              icon="external-link-alt"
+              variant="falcon-default"
+              className="mx-2"
+              onExport={(type) => {
+                if (type === 'print') window.print();
+              }}
             />
-          </>
+            <TableSearchInput
+              className="table-page-filter"
+              value={query}
+              onChange={setQuery}
+              placeholder="search ..."
+            />
+          </div>
         }
       >
         <TableContainer
           dataSource={data}
           loading={loading}
           rowKey={(r) => r.id ?? r.key}
+          headerClassName="text-nowrap align-middle"
+          rowClassName="align-middle white-space-nowrap"
         />
       </TablePageLayout>
 

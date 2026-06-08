@@ -11,12 +11,12 @@ const Login = () => {
     <AuthSplitLayout bgProps={{ image: bgImg, position: '50% 20%' }}>
       <Flex alignItems="center" justifyContent="between">
         <h3>Login</h3>
-        <p className="mb-0 fs-10">
+        {/* <p className="mb-0 fs-10">
           <span className="fw-semibold">New User? </span>
           <Link to={paths.splitRegister}>Create account</Link>
-        </p>
+        </p> */}
       </Flex>
-      <LoginForm layout="split" hasLabel />
+      <LoginForm layout="split" hasLabel showCaptcha />
     </AuthSplitLayout>
   );
 };
